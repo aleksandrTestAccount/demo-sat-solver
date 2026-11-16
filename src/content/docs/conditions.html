@@ -1,0 +1,83 @@
+<p class="chunk-paragraph">
+  The language supports three types of conditional statements: boolean conditions, implication-like
+  conditions, and ternary conditions.
+</p>
+
+<h3>Boolean Conditions</h3>
+
+<p class="chunk-paragraph">
+  Syntax: <code>b1 ? b2 == b3</code> (costs 2 clauses). If <code>b1</code> is <code>true</code>,
+  then <code>b2</code> must equal <code>b3</code>. If <code>b1</code> is <code>false</code>,
+  <code>b2</code> and <code>b3</code> may or may not be equal. Note that this is not a standard
+  equation line.
+</p>
+
+<h3>Implication-Like Conditions</h3>
+
+<p class="chunk-paragraph">
+  Syntax: <code>boolean1 ? number1 = number2</code> (costs 2 clauses per bit). For example, in
+  <code>a ? x = v</code>, if <code>a</code> is <code>true</code>, then <code>x</code> equals
+  <code>v</code>; if <code>a</code> is <code>false</code>, the condition is ignored and
+  <code>x</code> may or may not equal <code>v</code>.
+</p>
+
+<ul>
+  <li>Negation is allowed before the condition: <code>!a ? x1 = x2</code>.</li>
+  <li>Left-hand side and right-hand side positions cannot be swapped.</li>
+  <li>Because this is not a standard equation line, any nested operations must be enclosed in parentheses, or an error will occur: <code>(a || b) ? (x1 + x2) = (x3 - x4)</code>.</li>
+</ul>
+
+<h3>Ternary Conditions</h3>
+
+<p class="chunk-paragraph">
+  Syntax: <code>r = b ? n1 : n2</code> or <code>b ? n1 : n2 = r</code>. Although this structure
+  resembles traditional ternary operators in other languages, it translates under the hood into two
+  separate implication-like conditions:
+</p>
+
+<pre data-lang="e0">
+a ? x1 : x2 = x3 /* 
+    transforms into:
+    a ? x1 = x3
+    !a ? x2 = x3
+*/
+
+!a ? y1 : y2 = y3 /* 
+    transforms into:         
+    !a ? y1 = y3
+    a ? y2 = y3
+*/
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Ternary Condition with Known Values:</strong> If both branches are known constant values,
+  ternary conditions are completely free—only direct bit links are created.
+</p>
+
+<pre data-lang="e0">
+// this "convertion" boolean to number is free, only links will be created:   
+// {n:0: a, n:1: false, n:2: false, n:3: false} 
+a ? 1 : 0 = n; // or n = 1 ?* a
+
+// this is also free
+// {v:0: true, v:1: b, v:2: !b, v:3: false}
+b ? 3 : 5 = v; 
+
+size 3 0;
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Important:</strong> Both ternary branches must be valid (satisfiable / SAT) regardless of
+  whether the condition is <code>true</code> or <code>false</code>. If an inactive branch causes an
+  overflow or unsatisfiable constraint, the entire system evaluates to <code>false</code>:
+</p>
+
+<pre data-lang="e0">
+// result is false
+
+x &gt; 1
+
+r = false ? (200 * x) : 3
+
+size 8 0
+</pre>

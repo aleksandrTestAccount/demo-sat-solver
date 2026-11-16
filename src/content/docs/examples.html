@@ -1,0 +1,189 @@
+<p class="chunk-paragraph">
+  Generating the Fibonacci sequence using iterative relational bounds. This execution resolves
+  sequence values up to <code>v10 &lt; 64</code>.
+</p>
+
+<pre data-lang="e0">
+// Fibonacci sequence
+
+v10 &lt; 64
+
+v9 + v8 = v10
+v8 + v7 = v9
+v7 + v6 = v8
+v6 + v5 = v7
+v5 + v4 = v6
+v4 + v3 = v5
+v3 + v2 = v4
+v2 + v1 = v3
+
+v1 &lt; v2
+
+size + 7 0
+</pre>
+
+<p class="chunk-paragraph">
+  Finding a Pythagorean triple with positive integer constraints where the hypotenuse is bounded
+  by <code>c &lt; 8</code>.
+</p>
+
+<pre data-lang="e0">
+// Pythagorean triple 
+
+a*a + b*b = c*c
+
+a &gt; 0
+b &gt; 0
+c &gt; 0
+
+c &lt; 8
+
+size + 5 0
+</pre>
+
+<p class="chunk-paragraph">
+  Solving a system of simultaneous congruences using the Chinese remainder theorem.
+</p>
+
+<pre data-lang="e0">
+// Chinese remainder theorem 
+
+x % 3 = 2
+x % 5 = 3
+x % 7 = 2
+
+x &lt; 3 * 5 * 7
+                
+size + 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  Factoring an integer by finding non-trivial positive divisors greater than one.
+</p>
+
+<pre data-lang="e0">
+// Find divisors 
+
+a * b = 247
+
+a &gt; 1
+b &gt; 1
+                
+size + 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  Solving a linear system for 9 coins with denominations of 5 and 2 that sum up to 24.
+</p>
+
+<pre data-lang="e0">
+// 9 coins (values 5 and 2) with a total sum of 24
+
+v5 + v2 = 9
+5 * v5 + 2 * v2 = 24
+
+size + 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  Finding positive integer divisors greater than one with formatted output. Two results are
+  possible: <code>{a:13, b:19}</code> or <code>{a:19, b:13}</code>.
+</p>
+
+<pre data-lang="e0">
+// Find positive integer divisors greater than one
+// two results possible: {a:13, b:19} or {a:19, b:13}
+a * b = 247
+a &gt; 1
+b &gt; 1
+
+// 8 bits integer part, 0 bits fractional part, 1 bit sign
+size 8 0 // numbers in interval [-256, 255] 
+
+format "a = ${a}, b = ${b}"
+</pre>
+
+<p class="chunk-paragraph">
+  Restricting the search space using power-of-two upper bounds so that only one unique result
+  (<code>{a:13, b:19}</code>) is returned.
+</p>
+
+<pre data-lang="e0">
+// in this case only one result possible: {a:13, b:19}
+a * b = 247
+a &gt; 1
+b &gt; 1
+
+// it's better to use power of two for upper bound
+a &lt; 16 
+b &lt; 32
+
+size 8 0
+
+format "a = ${a}, b = ${b}"
+</pre>
+
+<p class="chunk-paragraph">
+  Equation sides can be interchanged and lines can be written in any order due to the
+  declarative nature of the language.
+</p>
+
+<pre data-lang="e0">
+// Equation sides can be interchanged
+// and lines can be in any order
+1 &lt; a
+size 8 0
+a &lt;= b
+247 = a * b
+b &gt; 1
+</pre>
+
+<p class="chunk-paragraph">
+  Optimizing performance and reducing memory consumption by directly constraining individual bits.
+  The least significant bit (LSB) is bit <code>0</code> (e.g., <code>x:0</code>), and the most
+  significant bit (MSB) represents the sign bit.
+</p>
+
+<pre data-lang="e0">
+// Bit Settings
+
+// Usually, setting bits improves performance and reduces memory consumption.
+// The least significant bit (LSB) is bit 0 (e.g., x:0).
+// The most significant bit (MSB) represents the sign bit.
+
+a * b = 247
+a != 1 
+
+// Since 247 = 3 (mod 4), the following constraints can be applied:
+a:0 == true // a is odd; LSB is 1
+a:1 == false // a = 1 (mod 4); bit 1 is 0
+
+b:0 == true // b is odd; LSB is 1
+b:1 == true // b = 3 (mod 4); bit 1 is 1
+
+a:8 == false // a is positive
+b:8 == false // b is positive
+
+size 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  Unsatisfiable constraints return no result (or <code>false</code>), such as when the allocated bit
+  size is too small or when attempting to factor a prime number.
+</p>
+
+<pre data-lang="e0">
+// no result, small bit size, with 7 bits all numbers will be less than 128
+a * b = 247
+a &gt; 1
+b &gt; 1
+size 7 0
+</pre>
+
+<pre data-lang="e0">
+// no result (or result is false), 97 is a prime
+a * b = 97
+a &gt; 1
+b &gt; 1
+size 8 0
+</pre>

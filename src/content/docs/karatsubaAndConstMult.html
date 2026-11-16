@@ -1,0 +1,98 @@
+<h3>Karatsuba Algorithm</h3>
+
+<p class="chunk-paragraph">
+  The Karatsuba algorithm is implemented for standard multiplication (<code>*</code>) and squaring
+  (<code>** 2</code>), but it is not implemented for power-of-two modular multiplication
+  (<code>{*}</code>) or modular squaring (<code>{**} 2</code>).
+</p>
+
+<p class="chunk-paragraph">
+  For small numbers, simple table-based multiplication is used. Switching to the Karatsuba
+  algorithm occurs at the following thresholds:
+</p>
+
+<ul>
+  <li><strong>Squaring (<code>** 2</code>):</strong> Switches to Karatsuba when the operand size is <code>30</code> bits or more.</li>
+  <li><strong>Regular multiplication (<code>*</code>):</strong> Can switch for numbers larger than <code>20</code> bits when upper bounds are known.</li>
+  <li><strong>Unbounded multiplication:</strong> If no upper bound is set, the switch occurs at <code>size 176 0</code>.</li>
+</ul>
+
+<p class="chunk-paragraph">
+  Switching to Karatsuba for regular multiplication is more complex than for squaring because the
+  language supports arbitrary factorizations (for example, <code>a * b = 256</code> allows
+  <code>[16, 16]</code>, <code>[2, 128]</code>, <code>[1, 256]</code>, and so on). When no upper
+  bound is specified, the initial step generates an overflow check instead of performing the first
+  sub-multiplication, executing 2 multiplications instead of 3 (logged as
+  <code>full, bitSize</code> in <code>karatsubaLog</code>). Because this overflow check is still
+  costly, setting explicit upper bounds is recommended: if both operands have bit sizes smaller
+  than half of the total bit size, no overflow checks are needed.
+</p>
+
+<p class="chunk-paragraph">
+  You can inspect the generated sub-multiplications in <strong>Result Details -&gt; karatsubaLog</strong>:
+</p>
+
+<pre data-lang="e0">
+a ** 2 = r
+
+size 70 0
+
+config solve false
+
+/* 
+    Details -&gt; karatsubaLog
+
+    multiplier bit size, result bit size
+    35,71  
+    18,37
+    17,35
+    19,39
+
+    3 squarings, with multipliers bit sizes 18, 17 and 19.
+*/
+</pre>
+
+<h3>Multiplication by a Known Value</h3>
+
+<p class="chunk-paragraph">
+  Multiplication by a known constant differs from general multiplication because bit-shift grouping
+  is used to minimize the number of additions. For example, multiplying by <code>27</code>
+  requires only 2 additions:
+</p>
+
+<pre data-lang="e0">
+a * 27 = r  /* 
+    transforms into
+    a + (a &lt;&lt; 1) = t
+    t + (t &lt;&lt; 3) = r
+    a &gt;= 0
+*/
+</pre>
+
+<p class="chunk-paragraph">
+  You can inspect how additions were grouped in <strong>Result Details -&gt; multAdditions</strong>.
+</p>
+
+<p class="chunk-paragraph">
+  <strong>Note:</strong> The current grouping implementation for constant multiplication only uses
+  additions for small numbers, is not yet optimal, and will be redesigned in future versions. In
+  some cases, writing equations manually using shifts and subtraction is much more efficient—for
+  example, multiplying by <code>31</code>:
+</p>
+
+<pre data-lang="e0">
+// 31 * a = r 
+a &lt;&lt; 5 = t 
+t - a = r
+</pre>
+
+<p class="chunk-paragraph">
+  When using this subtraction trick, allocate one extra bit to prevent overflow during the
+  intermediate shift (<code>a * 32</code>). Currently, two constant-multiplication grouping
+  strategies are available via configuration:
+</p>
+
+<pre data-lang="e0">
+config multByConstMethod 1
+config multByConstMethod 2
+</pre>

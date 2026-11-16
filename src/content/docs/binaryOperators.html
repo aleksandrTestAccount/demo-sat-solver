@@ -1,0 +1,273 @@
+<p class="chunk-paragraph">
+  Division and multiplication are performed only with positive numbers.
+</p>
+
+<p class="chunk-paragraph">
+  Consider an example with <code>size 15 0</code>. Every number uses 16 bits (16 variables); thus,
+  for <code>a</code>, <code>b</code>, and <code>r</code>, there are 48 variables in total.
+  Arithmetic operations create additional variables: for example, addition introduces a carry
+  variable and an intermediate result variable, adding <code>15 * 2 = 30</code> extra variables.
+  Additionally, each bit in addition generates 10 clauses, except for the first bit and the last
+  (sign) bit, which produce fewer clauses.
+</p>
+
+<p class="chunk-paragraph">
+  Approximate calculations for additional variables and clauses during addition:
+</p>
+
+<ul>
+  <li><code>Additional vars amount = 2 * bitSize - 2</code></li>
+  <li><code>Clauses = 10 * bitSize - 6</code></li>
+</ul>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th>Name</th>
+      <th>Example</th>
+      <th>Complexity &amp; Notes (<code>size 15 0</code>, 16 bits)</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="4"><strong>Arithmetic operations</strong></td>
+    </tr>
+    <tr>
+      <td><code>+</code></td>
+      <td>addition</td>
+      <td><code>a + b = r</code></td>
+      <td>30 additional vars, 78 total vars, 154 clauses (approx. 10 clauses per bit)</td>
+    </tr>
+    <tr>
+      <td><code>-</code></td>
+      <td>subtraction</td>
+      <td><code>a - b = r</code></td>
+      <td>30 additional vars, 78 total vars, 154 clauses</td>
+    </tr>
+    <tr>
+      <td><code>*</code></td>
+      <td>multiplication</td>
+      <td><code>a * b = r</code></td>
+      <td>278 additional vars, 326 total vars, 1188 clauses</td>
+    </tr>
+    <tr>
+      <td><code>/</code></td>
+      <td>division</td>
+      <td><code>a / b = r</code></td>
+      <td>427 total vars, 1476 clauses; performs integer division if there is no fractional part</td>
+    </tr>
+    <tr>
+      <td><code>/%</code></td>
+      <td>division with remainder</td>
+      <td><code>a /% b = (r1, r2)</code></td>
+      <td>Construct (not an operator); 427 total vars, 1476 clauses; returns a pair of numbers</td>
+    </tr>
+    <tr>
+      <td><code>%</code></td>
+      <td>remainder</td>
+      <td><code>a % b = r</code></td>
+      <td>427 total vars, 1476 clauses</td>
+    </tr>
+    <tr>
+      <td><code>!*</code></td>
+      <td>negative-multiplication</td>
+      <td><code>a !* b = r</code></td>
+      <td>466 total vars, 1642 clauses</td>
+    </tr>
+    <tr>
+      <td><code>?*</code></td>
+      <td>multiplication-by-boolean</td>
+      <td><code>a ?* b = r</code></td>
+      <td><code>operand2</code> must be boolean; transforms into <code>b ? a : 0 = r</code></td>
+    </tr>
+    <tr>
+      <td><code>**2</code></td>
+      <td>square</td>
+      <td><code>a ** 2 = r</code></td>
+      <td><code>operand2</code> must be the number <code>2</code></td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Bitwise operations</strong></td>
+    </tr>
+    <tr>
+      <td><code>&amp;</code></td>
+      <td>bitwise and</td>
+      <td><code>a &amp; b = r</code></td>
+      <td>0 additional vars, 48 total vars, 48 clauses</td>
+    </tr>
+    <tr>
+      <td><code>^</code></td>
+      <td>bitwise xor</td>
+      <td><code>a ^ b = r</code></td>
+      <td>0 additional vars, 48 total vars, 64 clauses</td>
+    </tr>
+    <tr>
+      <td><code>|</code></td>
+      <td>bitwise or</td>
+      <td><code>a | b = r</code></td>
+      <td>0 additional vars, 48 total vars, 48 clauses</td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Shift operations</strong></td>
+    </tr>
+    <tr>
+      <td><code>&lt;&lt;</code></td>
+      <td>left shift</td>
+      <td><code>a &lt;&lt; 4 = r</code></td>
+      <td>No overflow occurs (multiplies by a power of two). Free operation (links only); <code>operand2</code> must be a known positive integer</td>
+    </tr>
+    <tr>
+      <td><code>&gt;&gt;</code></td>
+      <td>right shift</td>
+      <td><code>a &gt;&gt; 1 = r</code></td>
+      <td>Free operation (links only); <code>operand2</code> must be a known positive integer</td>
+    </tr>
+    <tr>
+      <td><code>&gt;&gt;&gt;</code></td>
+      <td>unsigned right shift</td>
+      <td><code>a &gt;&gt;&gt; 2 = r</code></td>
+      <td>Left bits in result are <code>false</code>. Free operation (links only); <code>operand2</code> must be a known positive integer</td>
+    </tr>
+    <tr>
+      <td><code>&lt;&lt;*</code><br><code>*&gt;&gt;</code></td>
+      <td>open shift</td>
+      <td><code>a &lt;&lt;* 2 = r</code><br><code>b *&gt;&gt; 1 = c</code></td>
+      <td>New bits are not set and can be <code>true</code> or <code>false</code>; overflow is possible in left shift</td>
+    </tr>
+    <tr>
+      <td><code>&lt;&lt;</code></td>
+      <td>unknown left shift</td>
+      <td><code>a &lt;&lt; x = r</code></td>
+      <td>Expensive operation where <code>operand2</code> is a variable</td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Comparison operations</strong></td>
+    </tr>
+    <tr>
+      <td><code>&lt;</code></td>
+      <td>less than</td>
+      <td><code>a &lt; b == r</code></td>
+      <td>29 additional vars, 77 total vars, 152 clauses; for <code>0 &lt; b == r</code>, only the sign bit is checked</td>
+    </tr>
+    <tr>
+      <td><code>&lt;=</code></td>
+      <td>less than or equal</td>
+      <td><code>a &lt;= b == r</code></td>
+      <td>29 additional vars, 77 total vars, 152 clauses</td>
+    </tr>
+    <tr>
+      <td><code>&gt;</code></td>
+      <td>greater than</td>
+      <td><code>a &gt; b == r</code></td>
+      <td>29 additional vars, 77 total vars, 152 clauses</td>
+    </tr>
+    <tr>
+      <td><code>&gt;=</code></td>
+      <td>greater than or equal</td>
+      <td><code>a &gt;= b == r</code></td>
+      <td>29 additional vars, 77 total vars, 152 clauses; for <code>a &gt;= 0 == r</code>, only the sign bit is checked</td>
+    </tr>
+    <tr>
+      <td><code>=</code></td>
+      <td>equal</td>
+      <td><code>a = b == r</code></td>
+      <td>15 additional vars, 63 total vars, 109 clauses</td>
+    </tr>
+    <tr>
+      <td><code>!=</code></td>
+      <td>unequal</td>
+      <td><code>a != b == r</code></td>
+      <td>15 additional vars, 63 total vars, 109 clauses</td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Logical operations</strong></td>
+    </tr>
+    <tr>
+      <td><code>&amp;&amp;</code></td>
+      <td>logical and</td>
+      <td><code>a &amp;&amp; b == r</code></td>
+      <td>0 additional vars, 3 total vars, 3 clauses</td>
+    </tr>
+    <tr>
+      <td><code>||</code></td>
+      <td>logical or</td>
+      <td><code>a || b == r</code></td>
+      <td>0 additional vars, 3 total vars, 3 clauses</td>
+    </tr>
+    <tr>
+      <td><code>==</code></td>
+      <td>logical xnor</td>
+      <td><code>a == b == r</code></td>
+      <td>0 additional vars, 3 total vars, 4 clauses</td>
+    </tr>
+
+    <tr>
+      <td colspan="4"><strong>Power-of-two modular operations</strong> (only the integer part is used; sign bit and fractional part are ignored)</td>
+    </tr>
+    <tr>
+      <td><code>{+}</code></td>
+      <td>modular addition</td>
+      <td><code>a {+} b = r</code></td>
+      <td><code>200 {+} 200 = 144</code> (<code>size 8 0</code>)</td>
+    </tr>
+    <tr>
+      <td><code>{-}</code></td>
+      <td>modular subtraction</td>
+      <td><code>a {-} b = r</code></td>
+      <td><code>10 {-} 15 = 11</code> (<code>size 4 0</code>)</td>
+    </tr>
+    <tr>
+      <td><code>{*}</code></td>
+      <td>modular multiplication</td>
+      <td><code>a {*} b = r</code></td>
+      <td><code>11 {*} 13 = 15</code> (<code>size 5 0</code>)</td>
+    </tr>
+    <tr>
+      <td><code>{&lt;&lt;}</code></td>
+      <td>modular left shift</td>
+      <td><code>a {&lt;&lt;} 3 = r</code></td>
+      <td><code>255 {&lt;&lt;} 2 = 252</code> (<code>size 8 0</code>)</td>
+    </tr>
+    <tr>
+      <td><code>{&gt;&gt;&gt;}</code></td>
+      <td>modular unsigned right shift</td>
+      <td><code>a {&gt;&gt;&gt;} 2 = r</code></td>
+      <td>Same as unsigned right shift, ignoring both the sign bit and fractional part</td>
+    </tr>
+    <tr>
+      <td><code>{:&lt;&lt;:}</code></td>
+      <td>modular left rotation</td>
+      <td><code>a {:&lt;&lt;:} 1 = r</code></td>
+      <td><code>34 {:&lt;&lt;:} 2 = 10</code> (<code>size 6 0</code>); <code>operand2</code> must be a known positive integer</td>
+    </tr>
+    <tr>
+      <td><code>{:&gt;&gt;:}</code></td>
+      <td>modular right rotation</td>
+      <td><code>a {:&gt;&gt;:} 4 = r</code></td>
+      <td><code>7 {:&gt;&gt;:} 3 = 112</code> (<code>size 7 0</code>); <code>operand2</code> must be a known positive integer</td>
+    </tr>
+    <tr>
+      <td><code>{&lt;&lt;*}</code><br><code>{*&gt;&gt;}</code></td>
+      <td>modular open shift</td>
+      <td><code>a {&lt;&lt;*} 1 = r</code><br><code>b {*&gt;&gt;} 1 = x</code></td>
+      <td>New bits are not set and can be <code>true</code> or <code>false</code></td>
+    </tr>
+    <tr>
+      <td><code>{&amp;}</code><br><code>{^}</code><br><code>{|}</code></td>
+      <td>modular bitwise operations</td>
+      <td><code>a {&amp;} b = r</code><br><code>a {^} b = r</code><br><code>a {|} b = r</code></td>
+      <td>Same as non-modular bitwise operations, ignoring both the sign bit and fractional part</td>
+    </tr>
+    <tr>
+      <td><code>{**}</code></td>
+      <td>modular square</td>
+      <td><code>a {**} 2 = r</code></td>
+      <td><code>11 {**} 2 = 25</code> (<code>size 5 0</code>); <code>operand2</code> must be the number <code>2</code></td>
+    </tr>
+  </tbody>
+</table>

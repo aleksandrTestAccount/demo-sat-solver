@@ -1,0 +1,26 @@
+<p class="chunk-paragraph">
+  The tool is designed specifically for discrete quantities represented by a fixed number of bits.
+  Consequently, there is no direct support for irrational numbers. For example, the equation
+  <code>x * x = 2</code> has no solution regardless of the number of fractional bits, because the
+  square root of 2 is irrational.
+</p>
+
+<p class="chunk-paragraph">
+  To obtain an approximate solution for such equations, introduce an additional tolerance parameter
+  that allows minor deviations:
+</p>
+
+<pre data-lang="e0">
+x * x + a = 2
+
+a &gt;= 0
+a &lt;= 0.0125
+
+size 2 10
+</pre>
+
+<p class="chunk-paragraph">
+  All pre-computable operations should be performed prior to execution. If you need to use the
+  square root of a known number or mathematical constants such as <code>PI</code> or <code>E</code>,
+  substitute them with precomputed approximate values.
+</p>

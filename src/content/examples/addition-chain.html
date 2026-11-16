@@ -1,0 +1,53 @@
+<p class="chunk-paragraph">
+  An Addition Chain exploration sequence designed to reconstruct the target numeric constant
+  <code>43</code> using exactly 7 total optimal additions via iterative multi-choice selections.
+</p>
+
+<pre data-lang="e0">
+// Addition chain
+
+// Get 43 with 7 additions 
+
+size + 6 0
+
+n = 43
+
+// 1
+1 + 1 = 2
+
+// 2
+t2_1 ?= 1 2
+t2_2 ?= 1 2
+
+t2_1 + t2_2 = r2
+
+// 3
+t3_1 ?= 1 2 r2
+t3_2 ?= 1 2 r2
+
+t3_1 + t3_2 = r3
+
+// 4
+t4_1 ?= 1 2 r2 r3 
+t4_2 ?= 1 2 r2 r3 
+
+t4_1 + t4_2 = r4
+
+// 5
+t5_1 ?= 1 2 r2 r3 r4 
+t5_2 ?= 1 2 r2 r3 r4 
+
+t5_1 + t5_2 = r5
+
+// 6
+t6_1 ?= 1 2 r2 r3 r4 r5 
+t6_2 ?= 1 2 r2 r3 r4 r5 
+
+t6_1 + t6_2 = r6
+
+// 7
+t7_1 ?= 1 2 r2 r3 r4 r5 r6 
+t7_2 ?= 1 2 r2 r3 r4 r5 r6 
+
+t7_1 + t7_2 = n
+</pre>

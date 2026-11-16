@@ -1,0 +1,196 @@
+<p class="chunk-paragraph">
+  Unary minus is not supported for variables, although known literal values can be negative. To
+  negate a variable, subtract it from zero.
+</p>
+
+<pre data-lang="e0">
+-2 = r // ok
+a + -2 = r // ok
+
+-x = r // error
+0 - x = r // ok
+
+a + -x = r // error
+a + 0 - x = r // ok
+</pre>
+
+<p class="chunk-paragraph">
+  Logical negation <code>!varName</code> is translated directly into <code>3CNF-SAT</code> format
+  as the literal <code>!varName</code> without introducing any extra variables or equations. This
+  operation is completely free in terms of both memory consumption and execution time. In the case
+  of <code>!a == r</code>, a link <code>{a: !r}</code> is created.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation</th>
+      <th>Name</th>
+      <th>Example</th>
+      <th>Details</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>!</code></td>
+      <td>logical not</td>
+      <td><code>!a == r</code></td>
+      <td>Free operation (only link)</td>
+    </tr>
+    <tr>
+      <td><code>~</code></td>
+      <td>bitwise not</td>
+      <td><code>~a = r</code></td>
+      <td>Free operation (only links); <code>~5 = -6</code></td>
+    </tr>
+    <tr>
+      <td><code>%%</code></td>
+      <td>floor</td>
+      <td><code>%%a = r</code></td>
+      <td>Free operation (only links); <code>%%5.75 = 5</code></td>
+    </tr>
+    <tr>
+      <td><code>{~}</code></td>
+      <td>modular bitwise not</td>
+      <td><code>{~}a = r</code></td>
+      <td>Free operation (only links); <code>{~}5 = 250</code> (<code>size 8 0</code>)</td>
+    </tr>
+    <tr>
+      <td><code>^:</code></td>
+      <td>isolate the highest set bit</td>
+      <td><code>^:a = r</code></td>
+      <td>With <code>size 15 0</code>: 90 clauses (6 clauses per bit); <code>^:6 = 4</code></td>
+    </tr>
+    <tr>
+      <td><code>|:</code></td>
+      <td>mask from the highest set bit</td>
+      <td><code>|:a = r</code></td>
+      <td>With <code>size 15 0</code>: 45 clauses (3 clauses per bit); <code>|:6 = 7</code></td>
+    </tr>
+    <tr>
+      <td><code>+:</code></td>
+      <td>population count</td>
+      <td><code>+:a = r</code></td>
+      <td>With <code>size 15 0</code>: 134 clauses (approx. 10 clauses per bit); <code>+:6 = 2</code></td>
+    </tr>
+    <tr>
+      <td><code>&lt;:&gt;</code></td>
+      <td>reverse bits</td>
+      <td><code>&lt;:&gt;a = r</code></td>
+      <td>Free operation (only links); <code>&lt;:&gt;2 = 64</code> (<code>size 7 0</code>)</td>
+    </tr>
+    <tr>
+      <td><code>{&lt;:&gt;}</code></td>
+      <td>modular reverse bits</td>
+      <td><code>{&lt;:&gt;}a = r</code></td>
+      <td>Free operation (only links); <code>{&lt;:&gt;}2 = 32</code> (<code>size 7 0</code>)</td>
+    </tr>
+  </tbody>
+</table>
+
+<h3>Examples of Unary Operations</h3>
+
+<pre data-lang="e0">
+!x1 == true
+x2 == !false 
+x1 || !x2 == !x3
+//result: {x1: false, x2: true, x3: true}
+</pre>
+
+<pre data-lang="e0">
+size 10 0
+
+~x4 = 10
+3 + ~x5 = x4
+%% 10 = x6
+//result: {x4: -11, x5: 13, x6: 10}
+</pre>
+
+<pre data-lang="e0">
+size 10 3 //3 bits for fractional part, one bit number is 0.125
+
+~x8 = 10
+3 + ~x9 = x8
+%% 10.25 = x10
+
+%% x12 = 7
+
+//result: {x8: -10.125, x9: 13, x10: 10, x12: 7.75}
+</pre>
+
+<pre data-lang="e0">
+size 3 2
+
+%% a = b /* links will be created:
+    {b:0: false, b:1: false, b:2: a:2, b:3: a:3, b:4: a:4, b:5: a:5} */
+
+~ q = p /* links will be created:
+    {p:0: !q:0, p:1: !q:1, p:2: !q:2, p:3: !q:3, p:4: !q:4, p:5: !q:5, } */
+</pre>
+
+<h3>Common Bitwise &amp; Arithmetic Patterns</h3>
+
+<p class="chunk-paragraph">
+  <strong>Set variable as an integer:</strong>
+</p>
+
+<pre data-lang="e0">
+%%a = a // a is an integer
+
+size 8 3;
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Set consecutive bits to zeros then ones:</strong>
+</p>
+
+<pre data-lang="e0">
+|:a = a
++:a = bitsNumber
+
+size 8 0;
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Isolate the highest set bit manually:</strong>
+</p>
+
+<pre data-lang="e0">
+~( (|:a) &gt;&gt; 1) = t
+
+a &amp; t = r
+
+size 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Integer Binary Logarithm:</strong> If all numbers are integers, use this pattern to find the
+  floor binary logarithm for a positive number:
+</p>
+
+<pre data-lang="e0">
+a &gt;= 0
+
+|: a = t
+
++: (t &gt;&gt; 1) = floorIntLog
+
+size 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Upper Limit on Multiplication:</strong> Instead of performing expensive multiplication,
+  you can obtain the index positions of each number's highest set bit and add those indices
+  together:
+</p>
+
+<pre data-lang="e0">
+// a * b less than 8 bit number
+
+aLog + bLog &lt; 8
+
+a &gt;= 0; b &gt;= 0;
+
++: (|: a) = aLog;
++: (|: b) = bLog;
+</pre>

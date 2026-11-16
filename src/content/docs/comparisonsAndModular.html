@@ -1,0 +1,91 @@
+<h3>Comparison</h3>
+
+<p class="chunk-paragraph">
+  Comparison (less than, greater than) is performed by subtraction. Setting a sign constraint such
+  as <code>a &gt;= 0</code> or <code>a &lt; 0</code> is free. If a variable is positive and its
+  value is compared against an exact power-of-two upper bound, certain optimizations apply and the
+  comparison can also be free (for example, <code>a &gt;= 0; a &lt; 64;</code>).
+</p>
+
+<h3>Equal and Unequal</h3>
+
+<p class="chunk-paragraph">
+  The equation <code>a = b == r</code> is equivalent to <code>a != b == !r</code>. A single
+  equality sign (<code>=</code> or <code>==</code>) acts as the equation separator; if multiple
+  signs are present, one serves as the separator while the others function as operators.
+</p>
+
+<ul>
+  <li><code>a = b == true</code> creates a variable link <code>{b:a}</code> (free).</li>
+  <li><code>a = b == r</code> costs 7 clauses per bit (if <code>r == true</code> then <code>a = b</code>; if <code>r == false</code> then <code>a != b</code>).</li>
+  <li><code>a = b == false</code> costs 7 clauses per bit.</li>
+</ul>
+
+<p class="chunk-paragraph">
+  In many cases, it is better to use a conditional construct instead: <code>r ? a = b</code> costs
+  only 2 clauses per bit (if <code>r == true</code> then <code>a = b</code>; if
+  <code>r == false</code> then <code>a</code> and <code>b</code> can have any value, including
+  <code>a = b</code>).
+</p>
+
+<h3>Logical Imply and Boolean Condition</h3>
+
+<p class="chunk-paragraph">
+  Similarly, for boolean values, using a boolean condition construct is often more efficient than a
+  logical implication operator:
+</p>
+
+<ul>
+  <li><code>a ? b == r</code> — 2 clauses: if <code>a</code> is <code>true</code> then <code>b</code> equals <code>r</code> (this is a construct, not an operator).</li>
+  <li><code>!a || b == r</code> — 3 clauses: if <code>a</code> is <code>true</code> then <code>b</code> equals <code>r</code>; if <code>a</code> is <code>false</code> then <code>r</code> equals <code>true</code>.</li>
+</ul>
+
+<h3>Power-of-Two Modular Operations: <code>{operator}</code></h3>
+
+<p class="chunk-paragraph">
+  In modular expressions <code>a {operator} b = r</code>, operands <code>a</code>, <code>b</code>,
+  and <code>r</code> must be positive integers with a fractional part of zero. Only the integer
+  part is used, and all operations are performed modulo a power of two. Any negative input or
+  number with a non-zero fractional part returns <code>false</code>.
+</p>
+
+<pre data-lang="e0">
+x {+} -1 = 2; // result is false
+</pre>
+
+<pre data-lang="e0">
+size 8 2
+
+x {*} 0.5 = 1; // result is false
+</pre>
+
+<h3>Difference Between <code>{&lt;&lt;}</code> and <code>&lt;&lt;</code></h3>
+
+<p class="chunk-paragraph">
+  The modular shift <code>{&lt;&lt;}</code> operates strictly on the integer part (ignoring the
+  sign bit) and behaves like a standard left shift in most programming languages. In contrast,
+  <code>&lt;&lt;</code> operates as arithmetic multiplication by a power of two without overflow,
+  preserving the number's sign (positive remains positive, negative remains negative).
+</p>
+
+<p class="chunk-paragraph">
+  <strong>Shift Example:</strong> Subtracting one from an odd number is free using shifts:
+</p>
+
+<pre data-lang="e0">
+// if x is odd, y = x - 1
+(x &gt;&gt; 1) &lt;&lt; 1 = y
+</pre>
+
+<h3>Exponentiation</h3>
+
+<p class="chunk-paragraph">
+  It is often preferable to set an upper bound as a power of two. The exponentiation operator
+  <code>**</code> can be used for this purpose when both operands are known values. If the first
+  operand is a variable, only the second power (squaring) is supported.
+</p>
+
+<pre data-lang="e0">
+r &lt; 2 ** 5
+a ** 2 = r
+</pre>

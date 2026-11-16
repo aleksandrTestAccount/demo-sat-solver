@@ -1,0 +1,65 @@
+{
+  "name": "e0-light",
+  "type": "light",
+  "colors": {
+    "editor.background": "#fcfcfd",
+    "editor.foreground": "#1e232a"
+  },
+  "tokenColors": [
+    {
+      "scope": ["comment"],
+      "settings": {
+        "foreground": "#6e7781",
+        "fontStyle": "italic"
+      }
+    },
+    {
+      "scope": ["keyword.control"],
+      "settings": {
+        "foreground": "#8250df",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": ["keyword.operator"],
+      "settings": {
+        "foreground": "#cf222e",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": ["constant.numeric"],
+      "settings": {
+        "foreground": "#b45309",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": ["constant.language.boolean"],
+      "settings": {
+        "foreground": "#0550ae",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": ["support.function"],
+      "settings": {
+        "foreground": "#0284c7",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": ["variable.other"],
+      "settings": {
+        "foreground": "#116329",
+        "fontStyle": "bold"
+      }
+    },
+    {
+      "scope": ["punctuation"],
+      "settings": {
+        "foreground": "#4b5563"
+      }
+    }
+  ]
+}

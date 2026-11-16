@@ -1,0 +1,149 @@
+:root {
+  /* Muted Light Paper / Slate Palette */
+  --bg-main: #eef0f3;
+  --bg-secondary: #f6f7f9;
+  --bg-tertiary: #ebedf0;
+  --bg-editor: #fcfcfd;
+  --bg-toolbar: #e6e8ec;
+
+  --border-color: #d5d8df;
+  --border-strong: #c0c4ce;
+
+  --text-main: #1e232a;
+  --text-secondary: #4b5563;
+  --text-muted: #6b7280;
+
+  /* Industrial Accent */
+  --accent-primary: #2563eb;
+  --accent-hover: #1d4ed8;
+  --accent-soft: rgba(37, 99, 235, 0.1);
+
+  /* Semantic Status Tokens */
+  --status-error: #dc2626;
+  --status-error-hover: #b91c1c;
+  --status-error-bg: #fef2f2;
+  --status-error-border: #fecaca;
+
+  --status-success: #15803d;
+  --status-success-bg: #dcfce7;
+  --status-success-border: #86efac;
+
+  /* Layout Dimensions */
+  --topbar-height: 48px;
+  --subbar-height: 44px;
+  --sidebar-width: 230px;
+
+  /* Typography */
+  --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono: 'JetBrains Mono', 'Fira Code', Consolas, monospace;
+
+  /* Vibrant Syntax Tokens on Light Background */
+  --color-comment: #6e7781;
+  --color-keyword: #8250df;
+  --color-type: #0550ae;
+  --color-variable: #116329;
+  --color-operator: #cf222e;
+  --color-numeric: #b45309;
+  --color-boolean: #d97706;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: #c8ccd4 transparent;
+}
+
+body {
+  background-color: var(--bg-main);
+  color: var(--text-main);
+  font-family: var(--font-sans);
+  height: 100vh;
+  overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+@media (max-width: 960px) {
+  body {
+    height: auto;
+    overflow: auto;
+  }
+}
+
+/* Keyboard Accessibility */
+:focus-visible {
+  outline: 2px solid var(--accent-primary);
+  outline-offset: -2px;
+}
+
+/* Disable Ligatures for Exact Operator Clarity */
+code,
+pre,
+textarea {
+  font-variant-ligatures: none;
+  font-feature-settings: "liga" 0, "calt" 0;
+}
+
+/* Custom Thin Scrollbars (WebKit) */
+::-webkit-scrollbar {
+  width: 7px;
+  height: 7px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #c8ccd4;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Custom Token Highlighting (Editor, BaseChunk & SolverResults) */
+.code-comment-block-e0,
+.code-comment-line-double-slash-e0 {
+  color: var(--color-comment);
+  font-style: italic;
+}
+
+.code-keyword-control-e0 {
+  color: var(--color-keyword);
+  font-weight: 700;
+}
+
+.code-keyword-operator-e0 {
+  color: var(--color-operator);
+  font-weight: 700;
+}
+
+.code-constant-numeric-e0 {
+  color: var(--color-numeric);
+  font-weight: 700;
+}
+
+.code-constant-language-boolean-e0 {
+  color: var(--color-boolean);
+  font-weight: 700;
+}
+
+.code-support-function-e0 {
+  color: var(--color-type);
+  font-weight: 700;
+}
+
+.code-variable-other-e0 {
+  color: var(--color-variable);
+  font-weight: 600;
+}
+
+.code-punctuation-definition-bracket-e0,
+.code-punctuation-terminator-statement-e0 {
+  color: var(--text-secondary);
+}

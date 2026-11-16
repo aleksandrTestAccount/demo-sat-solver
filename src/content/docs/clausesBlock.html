@@ -1,0 +1,76 @@
+<p class="chunk-paragraph">
+  Every simple equation is transformed into <code>3CNF-SAT</code> format. For example, a logical
+  OR operation converts into three clauses:
+</p>
+
+<pre data-lang="e0">
+a || b == r /* transforms into:
+    clauses {
+        a b !r 
+        !a r
+        !b r
+    }
+*/
+/* one of four possible results is {a:false, b:true, r:true}, every clause will be true:
+    clauses {
+        a b !r  --&gt; false || true  || false == true
+        !a r    --&gt; true  || true           == true
+        !b r    --&gt; false || true           == true
+    }
+*/
+</pre>
+
+<p class="chunk-paragraph">
+  The <code>clauses</code> block allows specifying lists of clauses directly, one clause per line.
+  Each clause must contain one, two, or three literals, following <code>3CNF-SAT</code>
+  restrictions.
+</p>
+
+<pre data-lang="e0">
+a || b == r 
+
+//additional clauses
+clauses {
+    a b r 
+    a !b !r
+    !a !b !r
+}
+
+/* Full list of clauses (3 from logic operation and 3 from clauses block):
+    clauses {
+        a b !r 
+        !a r
+        !b r
+        a b r 
+        a !b !r
+        !a !b !r
+    }
+*/
+
+/* the only possible result is {a:true, b:false, r:true}, every clause will be true:
+    clauses {
+        a b !r   --&gt; true  || false || false == true
+        !a r     --&gt; false || true           == true
+        !b r     --&gt; true  || true           == true
+        a b r    --&gt; true  || false || true  == true
+        a !b !r  --&gt; true  || true  || false == true
+        !a !b !r --&gt; false || true  || false == true
+    }
+*/
+</pre>
+
+<p class="chunk-paragraph">
+  Disjunction equations of up to three literals (such as <code>a || b || c</code> or
+  <code>a || b || c == true</code>) convert directly into a single clause without introducing
+  intermediate variables:
+</p>
+
+<pre data-lang="e0">
+a || !b || !c 
+
+/* converts to
+    clauses {
+        a !b !c
+    }
+*/
+</pre>

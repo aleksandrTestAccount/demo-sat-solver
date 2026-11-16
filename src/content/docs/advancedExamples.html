@@ -1,0 +1,105 @@
+<h3>Maximum Value from a Set</h3>
+
+<p class="chunk-paragraph">
+  Finding the maximum value from the set <code>{3, 4, 1, 8, -3}</code> by combining lower-bound
+  inequalities with the <code>?=</code> set construct:
+</p>
+
+<pre data-lang="e0">
+// find max value from set { 3, 4, 1, 8, -3}
+
+maxValue &gt;= 3
+maxValue &gt;= 4
+maxValue &gt;= 1
+maxValue &gt;= 8
+maxValue &gt;= -3
+
+maxValue ?= 3 4 1 8 -3
+
+size 8 0
+</pre>
+
+<h3>Intersection of Sets (Bit Vector Representation)</h3>
+
+<p class="chunk-paragraph">
+  Representing subsets as bit vectors and computing their intersection with bitwise AND
+  (<code>&amp;</code>):
+</p>
+
+<pre data-lang="e0">
+// intersection of sets (bit vector representation) 
+
+// u = -1; universal set {1,2,3,4,5} 0b11111
+a = 7 // {1,2,3}  0b00111
+b = 14 // {2,3,4} 0b01110
+
+r = a &amp; b // {2,3} 0b00110
+
+size 4 0 
+</pre>
+
+<h3>Quadratic Equation with Negative Multiplication</h3>
+
+<p class="chunk-paragraph">
+  Solving <code>a * x² + b * x + c = 0</code> using signed multiplication (<code>!*</code>),
+  fractional precision, and an approximation interval around zero:
+</p>
+
+<pre data-lang="e0">
+// quadratic equation, with negative-multiplication 
+// a*x*x + b*x + c = 0  
+
+a = 4
+b = -5
+c = -12
+
+a !* x !* x + b !* x + c = zero
+
+-0.1 &lt; zero
+zero &lt; 0.1
+
+size 8 8 
+</pre>
+
+<h3>Reversing a Hash Function (DJB2)</h3>
+
+<p class="chunk-paragraph">
+  Recovering a 5-letter uppercase ASCII input (<code>HELLO</code>) from a 32-bit hash output using
+  power-of-two modular shift and addition operators:
+</p>
+
+<pre data-lang="e0">
+// hash function:
+
+/* 
+    function f(arr) {
+        let h = 5381; 
+        let mod = 2 ** 32;
+
+        for (let symbol of arr) {
+            h = (h * 33 + symbol) % mod;
+        }
+
+        return h
+    }
+*/ 
+
+// hash function input: 5 letters, uppercase
+// hash function output: 222103545
+
+symbol1 &gt;= 65; symbol1 &lt;= 90;
+symbol2 &gt;= 65; symbol2 &lt;= 90;
+symbol3 &gt;= 65; symbol3 &lt;= 90;
+symbol4 &gt;= 65; symbol4 &lt;= 90;
+symbol5 &gt;= 65; symbol5 &lt;= 90;
+
+h1 = 5381
+
+(h1 {&lt;&lt;} 5) {+} h1 {+} symbol1 = h2
+(h2 {&lt;&lt;} 5) {+} h2 {+} symbol2 = h3
+(h3 {&lt;&lt;} 5) {+} h3 {+} symbol3 = h4
+(h4 {&lt;&lt;} 5) {+} h4 {+} symbol4 = h5
+(h5 {&lt;&lt;} 5) {+} h5 {+} symbol5 = 222103545
+
+size + 32 0
+</pre>

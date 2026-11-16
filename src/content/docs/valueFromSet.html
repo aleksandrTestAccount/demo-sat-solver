@@ -1,0 +1,267 @@
+<p class="chunk-paragraph">
+  <strong>Note:</strong> The value-from-set construct (<code>?=</code>) is unstable and may be
+  changed or removed in future versions.
+</p>
+
+<pre data-lang="e0">
+x ?= 1 2 3 5 8 13 21 34
+
+size 8 0
+</pre>
+
+<h3>Assignment of Possible Values</h3>
+
+<p class="chunk-paragraph">
+  All examples in this section involve integers only.
+</p>
+
+<h3>Interval-Based Value Assignment</h3>
+
+<p class="chunk-paragraph">
+  The most straightforward method of defining an interval is through comparison operators, though
+  the resulting clause count can vary depending on the boundary values:
+</p>
+
+<pre data-lang="e0">
+// x is in interval [5, 20]
+x &gt;= 5
+x &lt;= 20
+
+size 15 0
+// In this case, the number of clauses is 52
+</pre>
+
+<pre data-lang="e0">
+// x is in interval [6, 21]
+x &gt;= 6
+x &lt;= 21
+
+size 15 0
+// In this case, the number of clauses is 37
+</pre>
+
+<pre data-lang="e0">
+// x is in interval [7, 22]
+x &gt;= 7
+x &lt;= 22
+
+size 15 0
+// In this case, the number of clauses is 54
+</pre>
+
+<p class="chunk-paragraph">
+  For large intervals, the comparison-based approach is preferable. For small intervals, more
+  efficient techniques apply:
+</p>
+
+<ul>
+  <li><strong>Single value <code>[5, 5]</code>:</strong> Use the equality operator (<code>x = 5</code>), which creates only a direct link <code>{x:5}</code>.</li>
+  <li><strong>Two values <code>[5, 6]</code>:</strong> Use a ternary condition (<code>b ? 5 : 6 = x</code>), which creates only bit links.</li>
+  <li><strong>Three values:</strong> Ternary conditions are still preferable, but grouping order matters—the more matching bits two numbers share, the fewer clauses are generated.</li>
+</ul>
+
+<p class="chunk-paragraph">
+  Grouping comparison for the set <code>{1, 2, 3}</code>:
+</p>
+
+<pre data-lang="e0">
+// 6 clauses
+b1 ? 1 : 2 = t1
+b2 ? t1 : 3 = x
+
+size 15 0
+</pre>
+
+<pre data-lang="e0">
+// 3 clauses
+b1 ? 1 : 3 = t1
+b2 ? t1 : 2 = x
+
+size 15 0
+</pre>
+
+<pre data-lang="e0">
+// 3 clauses
+b1 ? 2 : 3 = t1
+b2 ? t1 : 1 = x
+
+size 15 0
+</pre>
+
+<p class="chunk-paragraph">
+  Grouping comparison for the set <code>{2, 3, 4}</code>:
+</p>
+
+<pre data-lang="e0">
+// 3 clauses
+b1 ? 2 : 3 = t1
+b2 ? t1 : 4 = x
+
+size 15 0
+</pre>
+
+<pre data-lang="e0">
+// 6 clauses
+b1 ? 2 : 4 = t1
+b2 ? t1 : 3 = x
+
+size 15 0
+</pre>
+
+<pre data-lang="e0">
+// 9 clauses
+b1 ? 3 : 4 = t1
+b2 ? t1 : 2 = x
+
+size 15 0
+</pre>
+
+<h3>Non-Interval-Based Value Assignment</h3>
+
+<p class="chunk-paragraph">
+  Constraining <code>x</code> to a discrete set such as <code>{3, 6, 10}</code> using logical OR
+  and equality is inefficient:
+</p>
+
+<pre data-lang="e0">
+// 139 clauses
+x = 3 || x = 6 || x = 10 == true 
+
+size 15 0
+</pre>
+
+<p class="chunk-paragraph">
+  Instead, use nested ternary conditions or the <code>?=</code> construct, which automatically
+  generates a tree of ternary conditions (note that this construct is a prototype and is not yet
+  fully optimized):
+</p>
+
+<pre data-lang="e0">
+// {x: 2, a: 1, b: 2, c: 3}
+x ?= a b c; 
+
+x + a = 3; 
+x + b = 4; 
+x + c = 5;
+
+size 4 0
+</pre>
+
+<pre data-lang="e0">
+// x is in set { 1, 2, 3, 4, 5, 6, 7 }
+
+x ?= 1 2 3 4 5 6 7 /* example of possible transformation:
+    
+    b1 ? 1 : 2 = t1
+    b2 ? 3 : 4 = t2
+    b3 ? 5 : 6 = t3
+    
+    b4 ? t1 : t2 = t4 
+    b5 ? t3 : 7 = t5
+
+    b6 ? t4 : t5 = x
+
+*/
+
+size 15 0
+</pre>
+
+<pre data-lang="e0">
+// x is in set {3, 6, 7, 10, 20}
+
+x ?= 3 6 7 10 20 /* 
+    
+    b1 ? 3 : 6 = t1
+    b2 ? 7 : 10 = t2
+    b3 ? t2 : 20 = t3
+
+    b5 ? t1 : t3 = x 
+*/
+
+size 15 0
+</pre>
+
+<h3>Set with Variables</h3>
+
+<p class="chunk-paragraph">
+  When constraining a variable against a set of other variables (<code>x ?= a b c</code>), an
+  explicit implication-based pattern often produces better results:
+</p>
+
+<pre data-lang="e0">
+// x ?= a b c
+
+b1 ? x = a
+b2 ? x = b
+b3 ? x = c
+
+b1 || b2 || b3
+
+size 4 0
+</pre>
+
+<h3><code>?=</code> Condition Generation</h3>
+
+<p class="chunk-paragraph">
+  When pairing numbers in ternary conditions, pairing values with the maximum number of identical
+  bits minimizes clauses (for example, <code>101010</code> and <code>111000</code> merge into
+  <code>1x10x0</code>, and <code>x10x</code> with <code>xx00</code> into <code>xx0x</code>):
+</p>
+
+<ol>
+  <li>Both bits are known constants and equal: the resulting bit takes that common value (0 clauses).</li>
+  <li>Both bits are known constants but differ: the resulting bit becomes a direct variable link (0 clauses).</li>
+  <li>One bit is a variable and the other is a constant: 3 clauses are created.</li>
+  <li>Both bits are distinct variables: 4 clauses are created.</li>
+</ol>
+
+<p class="chunk-paragraph">
+  Internally, <code>?=</code> uses a prototype beam-search heuristic that groups elements and
+  explores multiple branching options to select the lowest-clause tree. Because branching grows
+  exponentially, you can tune its limits using <code>config valueFromSet</code> (default:
+  <code>config valueFromSet 64 2 64</code>). Increasing these values may significantly increase
+  generation time and memory usage.
+</p>
+
+<pre data-lang="e0">
+// 90 clauses   
+x ?= 2 3 5 8 13 21 34 55 89 144 9 16 25 36 49 64 81 100 121 
+</pre>
+
+<pre data-lang="e0">
+// 88 clauses   
+x ?= 2 3 5 8 13 21 34 55 89 144 9 16 25 36 49 64 81 100 121 
+
+config valueFromSet 2048 3 64
+</pre>
+
+<pre data-lang="e0">
+// 107 clauses   
+x ?= 2 1 3 4 7 11 18 29 47 76 123 199 322 521 843 1364 
+
+size 11 0
+</pre>
+
+<pre data-lang="e0">
+// 106 clauses   
+x ?= 2 1 3 4 7 11 18 29 47 76 123 199 322 521 843 1364 
+
+size 11 0
+
+config valueFromSet 64 3 64
+</pre>
+
+<p class="chunk-paragraph">
+  The generated condition tree for <code>?=</code> can be inspected in the output under
+  <strong>Details -&gt; valueFromSet</strong>.
+</p>
+
+<h3>Setting Bit Values</h3>
+
+<p class="chunk-paragraph">
+  Setting values within a power-of-two-aligned sub-interval using comparisons is not always optimal,
+  and manual bit constraints can help. For example, if <code>x</code> is in the interval
+  <code>[40, 47]</code>, all higher-order bits starting from <code>x:6</code> are <code>0</code>
+  (<code>false</code>), while <code>x:5 = 1</code>, <code>x:4 = 0</code>, and <code>x:3 = 1</code>.
+  While automatic optimization handles many cases, manual bit settings may occasionally be required.
+</p>

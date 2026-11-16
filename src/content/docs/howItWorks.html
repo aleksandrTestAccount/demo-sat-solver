@@ -1,0 +1,66 @@
+<p class="chunk-paragraph">
+  This language is a declarative language developed for generating boolean formulas expressed in
+  3CNF-SAT format. The language has no official name; its working name is <code>Equation Language</code>.
+</p>
+
+<p class="chunk-paragraph">
+  This <code>Equation Solver</code> solves complex equation systems by transforming them into 3-CNF-SAT format and then resolving them using basic backtracking search with unit propagation.
+  In many cases, these systems of equations are similar to standard SMT problems (Quantifier-Free
+  Bit-Vectors).
+</p>
+
+<p class="chunk-paragraph">
+  Every line is an equation, except for configuration lines and specific syntax exceptions.
+</p>
+
+<pre data-lang="e0">
+//single line examples:
+a + b = r       //ok
+(x + y) * q = p //ok 
+a1 &amp;&amp; b1 == r1  //ok, xnor is "==" ("equality" operator for boolean type) 
+a2 + b2         //error, no "=" 
+a3 * b3 == r    //error, "==" for boolean type, "=" for rational number 
+a4              //ok, a4 --&gt; a4 == true 
+a5 &gt; b5 == false//ok 
+a6 &gt; b6 == true //ok 
+a7 &gt; b7         //ok, a7 &gt; b7 --&gt; a7 &gt; b7 == true 
+a8 = b8 == r8   //ok 
+a9 == b9 == r9  //ok 
+</pre>
+
+<p class="chunk-paragraph">
+  A simple equation is defined as a structure consisting of four elements:
+  <code>[operand1, operator, operand2, result]</code>. Here, <code>operand1</code>,
+  <code>operand2</code>, and <code>result</code> can be either a Rational Number or a Boolean,
+  while operators are standard arithmetic and logical operators.
+</p>
+
+<p class="chunk-paragraph">
+  Every line converts into one or more simple equations, creating temporary intermediate variables
+  as needed. Note that this intermediate variable generation approach is not yet optimal and may
+  produce extra variables, especially for long logical and bitwise operation chains.
+</p>
+
+<pre data-lang="e0">
+a + b = r            // [ [a, +, b, r] ] 
+r = a + b            // [ [a, +, b, r] ] 
+a &gt; b == r2          // [ [a, &gt;, b, r2] ] (r2 is boolean) 
+b1 || b2 == b3       // [ [b1, ||, b2, b3] ] 
+
+a + b * c = r3       // [ [b, *, c, t1], [a, +, t1, r3] ] 
+a &gt; b &amp;&amp; b4 == true  // [ [a, &gt;, b, t2], [t2, &amp;&amp;, b4, true] ] 
+
+r4 = a / 2 + ( b ^ ~a) /*  [
+    [ 0, ~, a, t3],  "~" is a unary operation, operand1 is omitted
+    [ b, ^, t3, t4], 
+    [ a, /, 2, t5], 
+    [ t5, +, t4, r4] 
+] */
+</pre>
+
+<p class="chunk-paragraph">
+  Equations may be optimized or reduced by creating variable links. In the next step, simple
+  equations are converted into boolean formulas in <code>3CNF-SAT</code> format, where each
+  equation is transformed into conjunctive normal form (CNF) with clauses limited to three literals.
+  The resulting CNF formula is then optimized and solved using 3CNF-SAT algorithms.
+</p>

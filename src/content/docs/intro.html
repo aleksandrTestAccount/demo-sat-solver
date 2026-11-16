@@ -1,0 +1,193 @@
+<div class="proto-hero">
+  <h1 class="proto-hero-title">Proto Equation Language</h1>
+
+  <p class="proto-hero-lead">
+    A declarative constraint language and built-in solver that compiles arithmetic, bitwise, and logical equations into <strong style="white-space: nowrap;">3-CNF-SAT</strong> boolean formulas (at most 3 literals per clause) and solves them directly in the browser.
+  </p>
+
+  <div class="proto-pipeline">
+    <div class="pipe-step">
+      <span class="pipe-num">01</span>
+      <span class="pipe-name">Bit-Blasting</span>
+      <span class="pipe-desc">Fixed-point 2's complement vectors</span>
+    </div>
+    <div class="pipe-step">
+      <span class="pipe-num">02</span>
+      <span class="pipe-name">3-CNF Compilation</span>
+      <span class="pipe-desc">Reduction to ≤3-literal clauses</span>
+    </div>
+    <div class="pipe-step">
+      <span class="pipe-num">03</span>
+      <span class="pipe-name">3-SAT Solver</span>
+      <span class="pipe-desc">Basic backtracking search with unit propagation</span>
+    </div>
+  </div>
+</div>
+
+<p class="chunk-paragraph">
+  <strong>Quick Start:</strong> Enter your constraints in the editor (or click <em>Copy To Editor →</em> below) and press <strong>Solve</strong>. Define the global bit-width once for all rational numbers using <code>size &lt;int&gt; &lt;frac&gt;</code>.
+</p>
+
+<pre data-lang="eproto">// Integer factorization compiled to 3-CNF-SAT
+a * b = 247
+a &gt; 1
+b &gt; 1
+
+// 8-bit integer, 0-bit fraction (+1 sign bit)
+size 8 0</pre>
+
+<div class="intro-notes-list">
+  <div class="intro-note-card">
+    <div class="note-card-title">Design Philosophy</div>
+    <p>
+      Loops and conditional statements are intentionally omitted—a preprocessor supporting directives like <code>#for</code>, <code>#if</code>, and <code>#define</code> is planned for future releases. Even then, this language serves strictly as a low-level logic core: for complex systems, you should generate <code>.eproto</code> code using your favorite programming language.
+    </p>
+  </div>
+
+  <div class="intro-note-card is-edu">
+    <div class="note-card-title">Educational Purpose</div>
+    <p>
+      This project was created strictly for educational purposes. With its clean, intuitive syntax and step-by-step CNF inspection, it serves as an accessible introductory playground for students exploring <strong>SAT</strong>, <strong>SMT</strong>, bit-blasting, and <strong>NP-complete</strong> problems.
+    </p>
+  </div>
+</div>
+<br>
+<p class="chunk-paragraph">
+  <strong>Compilation Trade-off:</strong> This tool attempts to build a 3-CNF formula with the smallest possible number of clauses. While this is not always achieved, keep in mind that a minimal clause count is not always good—it can be inconvenient for SAT solvers and slow down the search.
+</p>
+
+<style>
+  .proto-hero {
+    position: relative;
+    padding: 4px 0 28px;
+    margin-bottom: 24px;
+    border-bottom: 1px solid var(--border-color);
+  }
+
+  .proto-hero-title {
+    font-size: clamp(2.1rem, 3.6vw, 2.85rem);
+    font-weight: 900;
+    letter-spacing: -0.04em;
+    line-height: 1.06;
+    margin-bottom: 14px;
+    background: linear-gradient(120deg, #0f172a 10%, #2563eb 50%, #7c3aed 85%);
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+  }
+
+  .proto-hero-lead {
+    font-size: 1rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+    margin-bottom: 24px;
+  }
+
+  .proto-hero-lead strong {
+    color: #1d4ed8;
+    font-weight: 700;
+  }
+
+  .proto-pipeline {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+  }
+
+  .pipe-step {
+    padding: 16px 16px 18px;
+    border: 1px solid var(--border-color);
+    border-top-width: 4px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+
+  .pipe-step:nth-child(1) {
+    background-color: #eff6ff;
+    border-color: #bfdbfe;
+    border-top-color: #1d4ed8;
+  }
+  .pipe-step:nth-child(1) .pipe-num {
+    color: #1d4ed8;
+  }
+
+  .pipe-step:nth-child(2) {
+    background-color: #f5f3ff;
+    border-color: #ddd6fe;
+    border-top-color: #6d28d9;
+  }
+  .pipe-step:nth-child(2) .pipe-num {
+    color: #6d28d9;
+  }
+
+  .pipe-step:nth-child(3) {
+    background-color: #ecfdf5;
+    border-color: #a7f3d0;
+    border-top-color: #047857;
+  }
+  .pipe-step:nth-child(3) .pipe-num {
+    color: #047857;
+  }
+
+  .pipe-num {
+    font-family: var(--font-mono);
+    font-size: 0.76rem;
+    font-weight: 800;
+  }
+
+  .pipe-name {
+    font-family: var(--font-mono);
+    font-size: 0.9rem;
+    font-weight: 800;
+    color: #0f172a;
+  }
+
+  .pipe-desc {
+    font-size: 0.85rem;
+    color: #334155;
+    line-height: 1.45;
+  }
+
+   .intro-notes-list {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin-top: 24px;
+  }
+
+  .intro-note-card {
+    padding: 16px 18px;
+    background-color: var(--bg-tertiary);
+    border: 1px solid var(--border-color);
+    border-left: 3px solid var(--accent-primary);
+  }
+
+  .intro-note-card.is-edu {
+    border-left-color: #047857;
+  }
+
+  .note-card-title {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    color: var(--text-main);
+    margin-bottom: 8px;
+  }
+
+  .intro-note-card p {
+    margin: 0;
+    font-size: 0.94rem;
+    line-height: 1.65;
+    color: var(--text-secondary);
+  }
+
+  @media (max-width: 720px) {
+    .proto-pipeline,
+    .intro-notes-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

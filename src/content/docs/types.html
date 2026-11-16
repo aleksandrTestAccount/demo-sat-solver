@@ -1,0 +1,94 @@
+<p class="chunk-paragraph">
+  The language supports only two data types: <code>boolean</code> and <code>rational number</code>.
+  Data types are determined automatically by operators. For example, all variables in arithmetic
+  equations (such as <code>a + b = r</code>) represent rational numbers, whereas all variables in
+  boolean equations (such as <code>x1 || x2 == x3</code>) represent boolean values.
+</p>
+
+<h3>Boolean type</h3>
+
+<p class="chunk-paragraph">
+  Booleans represent standard logical values: <code>true</code> and <code>false</code>.
+</p>
+
+<pre data-lang="e0">
+//a,b,c - boolean type vars
+a == true
+b == false
+1 &gt; 2 == c 
+size 4 0
+//result: {a: true, b: false, c: false}
+</pre>
+
+<pre data-lang="e0">
+c == true
+1 &gt; 2 == c 
+size 4 0
+//result: false
+</pre>
+
+<h3>Rational number type</h3>
+
+<p class="chunk-paragraph">
+  A rational number is stored as a fixed-size sequence (or vector) of boolean values in two's
+  complement representation, with fixed precision for integer and fractional parts plus an
+  additional bit reserved for the sign.
+</p>
+
+<p class="chunk-paragraph">
+  For instance, when defining <code>size 4 3</code>:
+</p>
+
+<ul>
+  <li><code>4</code> bits are assigned to the integer part.</li>
+  <li><code>3</code> bits are assigned to the fractional part.</li>
+  <li><code>1</code> bit is dedicated to representing the sign (consuming <code>8</code> bits in total).</li>
+</ul>
+
+<p class="chunk-paragraph">
+  <strong>Known Value Usage:</strong> If an integer value exceeds the allocated integer bits, it
+  causes an overflow error. Fractional values exceeding the designated fraction bits are rounded
+  accordingly.
+</p>
+
+<p class="chunk-paragraph">
+  <strong>Direct Bit Access:</strong> Each bit of a rational number is a boolean and can be accessed
+  by index using <code>varName : bitIndex</code>. For example, <code>v:3 == true</code> sets the
+  third bit of variable <code>v</code>. The sign bit (the last bit) can be accessed via
+  <code>v:s == false</code>, <code>v:-1 == false</code>, or by its explicit position (such as
+  <code>v:7</code> in an 8-bit number). Checking the sign bit prevents overflow conditions in
+  addition and subtraction.
+</p>
+
+<p class="chunk-paragraph">
+  Unary negation (<code>-</code>) is omitted from the language because it requires performing
+  addition after bitwise negation, which is not a free operation. Instead, use binary subtraction
+  from zero: <code>0 - varName = negVarName</code>.
+</p>
+
+<h3>Rational Number Representation</h3>
+
+<p class="chunk-paragraph">
+  Numbers can be written in four formats: binary (<code>0b</code>), hexadecimal (<code>0x</code>),
+  octal (<code>0o</code>), and decimal (<code>0d</code>). If numbers have a fractional part, it is
+  better to use binary format to minimize approximation errors.
+</p>
+
+<ul>
+  <li><code>0b101.1</code> equals decimal <code>5.5</code></li>
+  <li><code>0xB.A</code> equals decimal <code>11.625</code></li>
+  <li><code>0o13.3</code> equals decimal <code>11.375</code></li>
+  <li><code>0d12.34</code> equals decimal <code>12.34</code></li>
+</ul>
+
+<p class="chunk-paragraph">
+  Since leading zeros at the beginning of numbers can be interpreted differently across programming
+  languages, an error is raised to avoid ambiguity.
+</p>
+
+<pre data-lang="e0">
+001 = x    // error
+0b001 = x  // ok
+05 = x     // error
+0d05 = x   // ok
+</pre>

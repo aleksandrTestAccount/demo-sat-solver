@@ -1,0 +1,78 @@
+<p class="chunk-paragraph">
+  The <code>binarySearch</code> directive finds the minimum or maximum valid value for a target
+  variable within an inclusive range:
+</p>
+
+<pre data-lang="e0">
+binarySearch min|max variableName lowerBound upperBound
+</pre>
+
+<p class="chunk-paragraph">
+  For example, searching the interval from <code>0</code> to <code>1000</code> to find the minimum
+  possible value of <code>x</code>:
+</p>
+
+<pre data-lang="e0">
+binarySearch min x 0 1000;
+</pre>
+
+<p class="chunk-paragraph">
+  A possible execution path proceeds as follows:
+</p>
+
+<ol>
+  <li>Check the left interval <code>[0, 499]</code>: result is <code>true</code>, found <code>x = 120</code>.</li>
+  <li>Check the left interval <code>[0, 59]</code>: result is <code>false</code>.</li>
+  <li>Check the right interval <code>[60, 119]</code>: result is <code>true</code>, found <code>x = 90</code>.</li>
+  <li>Check the left interval <code>[60, 74]</code>: result is <code>false</code>.</li>
+  <li>Check the right interval <code>[75, 89]</code>: result is <code>false</code>; return the last valid result: <code>x = 90</code>.</li>
+</ol>
+
+<p class="chunk-paragraph">
+  <strong>Note:</strong> Strategy selection and customization are planned for future updates, as the
+  current search strategy can be suboptimal for certain tasks.
+</p>
+
+<h3>Examples</h3>
+
+<pre data-lang="e0">
+// result: {x3: 8}
+
+x1 * x2 &gt; 15; 
+x1 + x2 = x3; 
+
+x1 &gt;= 0; x2 &gt;= 0; x3 &gt;= 0; 
+
+size 6; 
+
+binarySearch min x3 0 30;
+</pre>
+
+<pre data-lang="e0">
+// result: {x3: 9}
+
+x1 * x2 &lt; 15; 
+x1 + x2 = x3; 
+
+x1 &gt; 1; x2 &gt; 1; x3 &gt; 1; 
+
+size 6;
+
+binarySearch max x3 0 30
+</pre>
+
+<pre data-lang="e0">
+a + b = 30
+
+a * b = v
+
+size + 10 0
+
+binarySearch max v 0 1000
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Performance Note:</strong> Currently, the entire equation system is regenerated from
+  scratch at each binary search step, which is computationally expensive. In future versions, the
+  problem will be generated once and only the interval bounds will be updated at each step.
+</p>

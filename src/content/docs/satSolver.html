@@ -1,0 +1,25 @@
+<p class="chunk-paragraph">
+  The current implementation of the SAT solver is a baseline prototype and will be rewritten in
+  future updates. Note one important behavior: if a variable has no effect on the final result
+  (meaning it can be either <code>true</code> or <code>false</code>), the solver sets that variable
+  to <code>false</code> by default.
+</p>
+
+<h3><code>config solve false</code></h3>
+
+<p class="chunk-paragraph">
+  To inspect how many variables and clauses a model generates without running the solver, use
+  <code>config solve false</code>. When enabled, the code is parsed, validated, compiled into
+  clauses, and optimized, while the final solving step is skipped (note that memory overflow is
+  still possible if an extremely large number of clauses is generated):
+</p>
+
+<pre data-lang="e0">
+size 101 0
+
+a * b = 1267650600228229401496703205376
+
+a &lt; 2 ** 50
+
+config solve false
+</pre>

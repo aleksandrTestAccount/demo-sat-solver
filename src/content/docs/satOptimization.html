@@ -1,0 +1,107 @@
+<p class="chunk-paragraph">
+  Before solving the <code>3CNF-SAT</code> problem, an optimization pass simplifies the generated
+  clauses through four main steps:
+</p>
+
+<ol>
+  <li><strong>Known values removal:</strong> Known literals (<code>0</code> or <code>1</code>) are removed from clauses. If a clause contains <code>1</code>, the entire clause evaluates to <code>true</code> and is discarded.</li>
+  <li><strong>Single-literal clause resolution:</strong> Clauses containing only one literal fix that literal's value to <code>1</code>, and all occurrences of the variable in other clauses are updated accordingly.</li>
+  <li><strong>Pairs reduction:</strong> Simplifies two-literal clauses (pairs) that share the same variables with differing signs.</li>
+  <li><strong>Pure literal check:</strong> Identifies variables that appear exclusively as positive or exclusively as negative literals across the entire formula and assigns them fixed values (<code>0</code> or <code>1</code>).</li>
+</ol>
+
+<h3>Pairs Reduction</h3>
+
+<p class="chunk-paragraph">
+  When two pairs with the exact same variables are discovered, three cases can occur:
+</p>
+
+<p class="chunk-paragraph">
+  <strong>1. Identical pairs:</strong> One duplicate pair is removed.
+</p>
+
+<p class="chunk-paragraph">
+  <strong>2. One matching literal, one opposing:</strong> The matching literal is fixed to
+  <code>1</code>, and both clauses are discarded.
+</p>
+
+<pre data-lang="e0">
+// in this case, result will be {x1: false} and both clauses are removed               
+clauses {
+    !x1 x2
+    !x1 !x2
+}
+</pre>
+
+<pre data-lang="e0">
+// in this case, result will be {x2: true} and both clauses are removed               
+clauses {
+    !x1 x2
+    x1 x2
+}
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>3. Both literals are opposite:</strong> Variable links are created equating the first
+  literal of the first clause to the negation of the second literal, and both clauses are
+  discarded.
+</p>
+
+<pre data-lang="e0">
+// in this case, links will be {x1: !x2} and both clauses are removed               
+clauses {
+    x1 x2
+    !x1 !x2
+}
+</pre>
+
+<pre data-lang="e0">
+// in this case, links will be {x1: x2} and both clauses are removed               
+clauses {
+    x1 !x2
+    !x1 x2
+}
+</pre>
+
+<h3>Pure Variable Check</h3>
+
+<p class="chunk-paragraph">
+  Variables that appear with only one polarity throughout the clause set are automatically resolved
+  during optimization:
+</p>
+
+<pre data-lang="e0">
+// in this case, x1 is pure, result will be {x1: false}, 
+// and all clauses will be removed during optimization step                
+clauses {
+    !x1 x2 x3
+    !x1 !x2 !x3 
+    !x1 x4 x5 
+    !x1 !x4 !x5
+}
+</pre>
+
+<p class="chunk-paragraph">
+  During benchmarking or when comparing how many clauses and variables each equation produces, you
+  can disable pure literal elimination with <code>config checkPure false</code>:
+</p>
+
+<pre data-lang="e0">
+// in this case, x1 is pure, but no optimization occurs.                
+clauses {
+    !x1 x2 x3
+    !x1 !x2 !x3 
+    !x1 x4 x5 
+    !x1 !x4 !x5
+}
+
+config checkPure false
+</pre>
+
+<h3>Optimizer Limitations</h3>
+
+<p class="chunk-paragraph">
+  The optimizer does not currently perform certain higher-order resolutions—for example, reducing
+  <code>x1 x2 x3</code> and <code>x1 x2 !x3</code> into a single clause <code>x1 x2</code>. Such
+  cases arise rarely, and additional optimization passes may be added in future updates.
+</p>

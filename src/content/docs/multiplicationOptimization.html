@@ -1,0 +1,101 @@
+<p class="chunk-paragraph">
+  Multiplication occurs in several forms:
+</p>
+
+<ol>
+  <li>Regular multiplication (all variables unknown)</li>
+  <li>Known result (integer factorization)</li>
+  <li>Multiplication by a known constant value</li>
+  <li>Squaring (<code>** 2</code>)</li>
+  <li>Power-of-two modular multiplication and squaring (<code>{*}</code> and <code>{**} 2</code>)</li>
+</ol>
+
+<p class="chunk-paragraph">
+  The best optimization for multiplication is to avoid it altogether. When only an approximate
+  value or an upper bound is needed and exact precision is unnecessary, adding integer binary
+  logarithms (<code>+: (|: a) = aLog;</code>) is significantly faster.
+</p>
+
+<h3>Approximate Value</h3>
+
+<p class="chunk-paragraph">
+  In practical engineering problems where exact precision is not required, you can reduce large
+  numbers using right bit shifts before multiplying, and shift the result back afterward:
+</p>
+
+<pre data-lang="e0">
+// approximate multiplication
+// a * b = r 
+
+a &gt;&gt; 3 = ta 
+b &gt;&gt; 3 = tb
+
+ta * tb = tr 
+
+tr &lt;&lt; 6 = r 
+</pre>
+
+<h3>Setting an Upper Bound</h3>
+
+<p class="chunk-paragraph">
+  During compilation, the upper bounds of the multiplicands are checked first to select the most
+  efficient multiplication algorithm. Setting tight upper bounds significantly reduces the number
+  of generated clauses.
+</p>
+
+<p class="chunk-paragraph">
+  It is preferable to use exact powers of two as upper bounds so that higher-order bits are simply
+  fixed to <code>false</code>. Using a non-power-of-two upper bound requires generating extra
+  comparison clauses.
+</p>
+
+<p class="chunk-paragraph">
+  <strong>Valid upper bounds (known constants):</strong>
+</p>
+
+<pre data-lang="e0">
+a * b = r
+
+a &lt; 16 // upper bound must be a known value
+b &lt; 2 ** 4 // for simplicity, exponentiation can be used
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Invalid upper bounds (variable expressions):</strong>
+</p>
+
+<pre data-lang="e0">
+a * b = r
+
+// These are not upper bounds, as these values are not known values.
+a &lt; t + 8
+b &lt; a 
+</pre>
+
+<h3>Squaring</h3>
+
+<p class="chunk-paragraph">
+  Because both operands are identical, squaring (<code>a ** 2 = r</code>) is significantly faster
+  and generates far fewer clauses than general multiplication. Moreover, when multiplying large
+  numbers via Karatsuba's algorithm—which decomposes multiplication into smaller
+  sub-multiplications—squaring ensures that many of the resulting sub-operations are also
+  squarings. Currently, <code>a * a = r</code> is automatically transformed into
+  <code>a ** 2 = r</code>.
+</p>
+
+<pre data-lang="e0">
+// 1108 clauses                   
+a * b = r 
+
+a &lt; 2 ** 10
+b &lt; 2 ** 10
+
+size 20 0
+</pre>
+
+<pre data-lang="e0">
+// 599 clauses    
+a ** 2 = r 
+
+size 20 0
+</pre>

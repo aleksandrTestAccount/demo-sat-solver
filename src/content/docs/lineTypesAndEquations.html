@@ -1,0 +1,80 @@
+<h3>Types of Lines</h3>
+
+<p class="chunk-paragraph">
+  Every statement in the language falls into one of the following eight line types:
+</p>
+
+<ol>
+  <li><strong>Equations:</strong> <code>a + b * c = r</code></li>
+  <li><strong>Configs:</strong> <code>size</code>, <code>config</code>, <code>format</code></li>
+  <li><strong>Conditions:</strong> <code>?</code></li>
+  <li><strong>Clauses block:</strong> <code>clauses{}</code></li>
+  <li><strong>Division with remainder:</strong> <code>a /% b = (r, remainder)</code></li>
+  <li><strong>Value from set:</strong> <code>r ?= a b c d e</code></li>
+  <li><strong>Boolean values adder:</strong> <code>x += a b c d e</code></li>
+  <li><strong>Binary search</strong></li>
+</ol>
+
+<h3>Equation Lines</h3>
+
+<p class="chunk-paragraph">
+  Almost every equation is converted into a simple four-element form. Operator precedence and
+  parentheses are supported. If a line does not contain any equality signs (<code>=</code> or
+  <code>==</code>), two elements (<code>==</code> and <code>true</code>) are automatically
+  appended to the end—for example, <code>a &gt;= 0</code> becomes <code>a &gt;= 0 == true</code>.
+</p>
+
+<p class="chunk-paragraph">
+  The semicolon symbol (<code>;</code>) acts as a separator between multiple equations on a single
+  line. For instance, <code>a + b = c; a &gt;= 0; b &gt;= 0;</code> converts into three separate
+  lines:
+</p>
+
+<pre data-lang="e0">
+a + b = c
+a &gt;= 0 == true
+b &gt;= 0 == true
+</pre>
+
+<h3>Operator Precedence</h3>
+
+<p class="chunk-paragraph">
+  Unary operators have higher precedence than binary operators. Binary operators are evaluated in
+  the following order (from highest to lowest precedence):
+</p>
+
+<ol>
+  <li><code>**</code>, <code>{**}</code></li>
+  <li><code>*</code>, <code>/</code>, <code>!*</code>, <code>%</code>, <code>?*</code>, <code>{*}</code></li>
+  <li><code>+</code>, <code>-</code>, <code>{+}</code>, <code>{-}</code></li>
+  <li><code>&lt;&lt;</code>, <code>&gt;&gt;</code>, <code>&lt;&lt;*</code>, <code>*&gt;&gt;</code>, <code>{&lt;&lt;}</code>, <code>{&gt;&gt;&gt;}</code>, <code>{&lt;&lt;*}</code>, <code>{*&gt;&gt;}</code>, <code>{:&lt;&lt;:}</code>, <code>{:&gt;&gt;:}</code></li>
+  <li><code>&amp;</code>, <code>{&amp;}</code></li>
+  <li><code>^</code>, <code>{^}</code></li>
+  <li><code>|</code>, <code>{|}</code></li>
+  <li><code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code></li>
+  <li><code>=</code>, <code>!=</code></li>
+  <li><code>&amp;&amp;</code></li>
+  <li><code>||</code></li>
+  <li><code>==</code></li>
+</ol>
+
+<p class="chunk-paragraph">
+  <strong>XNOR (<code>==</code>):</strong> Many programming languages evaluate the <code>==</code>
+  operator before logical operators in expressions such as <code>a &amp;&amp; b == c &amp;&amp; d</code>.
+  In this language, however, the <code>==</code> symbol represents the logical <code>XNOR</code>
+  operation and holds the lowest precedence.
+</p>
+
+<h3><code>config inputVarsPositive true</code></h3>
+
+<p class="chunk-paragraph">
+  This configuration directive ensures that all numeric variables explicitly present in the code
+  are constrained to be non-negative numbers. Note that internally generated temporary variables may
+  still take negative values. A shorthand syntax can be combined directly with <code>size</code>:
+</p>
+
+<pre data-lang="e0">
+size + 8 0 // config inputVarsPositive true
+
+a + b = -1 // result is false
+</pre>

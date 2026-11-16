@@ -1,0 +1,55 @@
+<h3>Boolean Values Adder</h3>
+
+<p class="chunk-paragraph">
+  The <code>+=</code> construct sums a list of boolean values (counting how many are
+  <code>true</code>) and equates the total to a numeric variable or constant:
+</p>
+
+<pre data-lang="e0">
+// x = 2 
+x += a b c
+
+a || b == c
+a &amp;&amp; b == !c
+</pre>
+
+<pre data-lang="e0">
+// x = 3 
+x += false false true false true true false
+</pre>
+
+<pre data-lang="e0">
+// a == false; b == true; c == true; 
+
+2 += a b c
+
+a || b == b &amp;&amp; c
+</pre>
+
+<h3>Number as a Structure</h3>
+
+<p class="chunk-paragraph">
+  Because a rational number is stored as a fixed-size vector of boolean values, it can be used as
+  a data structure such as a stack. However, every modification to the structure requires creating
+  a new numeric variable snapshot:
+</p>
+
+<pre data-lang="e0">
+// Let's consider the following case:
+// letters size is 2 bits
+// s0 s1 - "steps" of stack or "snapshot" 
+// if condition is true, the stack is changed
+
+s0 = 0
+
+n1 = s0 &lt;&lt;* 2; n1:0 == letter1_1; n1:1 == letter1_2; 
+condition1 ? n1 : s0 = s1
+
+n2 = s1 &lt;&lt; 2; n2:0 == letter2_1; n2:1 == letter2_2; 
+condition2 ? n2 : s1 = s2
+</pre>
+
+<p class="chunk-paragraph">
+  In practice, it is better not to use numbers as data structures and instead generate code using
+  the exact number of individual boolean variables needed.
+</p>

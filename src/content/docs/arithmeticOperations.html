@@ -1,0 +1,135 @@
+<h3>Division</h3>
+
+<p class="chunk-paragraph">
+  Avoid division if possible. Division is replaced by multiplication and addition, meaning the
+  equation <code>a / b = r</code> introduces the following constraints:
+</p>
+
+<ol>
+  <li><code>b * r + remainder = a</code></li>
+  <li><code>remainder &gt;= 0</code></li>
+  <li><code>b * oneBitNumber &gt; remainder</code></li>
+</ol>
+
+<p class="chunk-paragraph">
+  In <code>a / b = r</code>, <code>b</code> cannot be zero because no solution exists that
+  satisfies both <code>remainder &gt;= 0</code> and <code>b * oneBitNumber &gt; remainder</code>.
+</p>
+
+<h3>Remainder and Division with Remainder</h3>
+
+<p class="chunk-paragraph">
+  Division and division with remainder return different quotients for numbers with a fractional
+  part. The division with remainder construct uses the syntax <code>a /% b = (quotient, remainder)</code>
+  and enforces the following relations:
+</p>
+
+<pre data-lang="e0">
+b * quotient + remainder = a
+remainder &gt;= 0
+b * oneBitNumber &gt; remainder
+quotient = %%quotient // integer
+</pre>
+
+<p class="chunk-paragraph">
+  Here, <code>quotient</code> is the integer result of dividing <code>a</code> by <code>b</code>,
+  and <code>remainder</code> is the non-negative remainder (<code>a mod b</code>). Because
+  calculating the remainder naturally computes the quotient as well, this construct returns both
+  values as a pair.
+</p>
+
+<p class="chunk-paragraph">
+  Unlike the division with remainder construct, the remainder operator (<code>a % b = r</code>) can
+  be used directly within an equation line. However, since <code>quotient</code> is still
+  calculated internally, it can trigger an overflow error when working with fractional numbers:
+</p>
+
+<pre data-lang="e0">
+// result is false, even if 1 % 0.25 = 0, because 1 / 0.25 = 4 (overflow)
+
+a % 0.25 = r
+
+a &gt;= 1
+a &lt;= 1
+
+size 1 2 // max value is 1
+</pre>
+
+<h3>Multiplication</h3>
+
+<p class="chunk-paragraph">
+  Ordinary multiplication works only with positive numbers. When using a fractional part, the
+  number of generated clauses increases significantly.
+</p>
+
+<p class="chunk-paragraph">
+  <strong>Multiplication of Negative Numbers:</strong> To multiply negative numbers manually, you
+  must check their signs and compute their absolute values:
+</p>
+
+<pre data-lang="e0">
+// a * b = r 
+
+a:s == b:s == !r:s // signs
+
+0 - a = ta
+0 - b = tb
+
+!a:s ? a : ta = aAbs 
+!b:s ? b : tb = bAbs
+
+aAbs * bAbs = rAbs
+
+0 - rAbs = tr
+
+!r:s ? rAbs : tr = r
+
+size 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  You can use the shorthand operator <code>!*</code> (<code>a !* b = r</code>), which
+  automatically generates the sign-handling logic shown above. If one operand is guaranteed to be
+  positive (for example, <code>b</code>), you can write a lighter version manually:
+</p>
+
+<pre data-lang="e0">
+// a * b = r 
+
+a:s == r:s // signs
+
+!a:s ? a : ta = aAbs 
+
+aAbs * b = rAbs
+
+0 - rAbs = tr
+
+!r:s ? rAbs : tr = r
+
+size 8 0
+</pre>
+
+<p class="chunk-paragraph">
+  <strong>Multiplication by Boolean Value:</strong> The <code>?*</code> operator multiplies a
+  number by a boolean condition, expanding into conditional expressions:
+</p>
+
+<pre data-lang="e0">
+// Subset sum
+
+2 ?* x1 + 3 ?* x2 + 8 ?* x3 + 7 ?* x4 + 9 ?* x5 = 19
+
+size 5 0
+
+/* transforms into
+
+x1 ? 2 : 0 = t1
+x2 ? 3 : 0 = t2
+x3 ? 8 : 0 = t3
+x4 ? 7 : 0 = t4
+x5 ? 9 : 0 = t5
+
+t1 + t2 + t3 + t4 + t5 = 19
+
+*/
+</pre>

@@ -1,0 +1,17 @@
+<p class="chunk-paragraph">
+  Karp's 11th NP-complete problem: 3-Satisfiability (3-SAT). Represents a configuration of boolean
+  clauses limited to at most 3 literals each, modeled via native engine
+  <code>clause</code> components.
+</p>
+
+<pre data-lang="e0">
+// Karp's problem 11. Satisfiability with at most 3 literals per clause 
+
+// (x1 || !x2 || x3) && (x1 || x2 || x4) &&  (!x1 || !x2 || x5) 
+clauses {
+    x1 !x2 x3 
+    x1 x2 x4
+    !x1 !x2 x5
+}
+
+</pre>

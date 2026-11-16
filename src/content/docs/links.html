@@ -1,0 +1,27 @@
+<p class="chunk-paragraph">
+  When expressions like <code>a = b == true</code> occur, variable <code>a</code> becomes linked
+  to variable <code>b</code>, replacing all occurrences of <code>a</code> with <code>b</code>
+  within the list of equations.
+</p>
+
+<pre data-lang="e0">
+x1 + a = x2
+a = b == true
+x3 * b = x4
+</pre>
+
+<p class="chunk-paragraph">
+  This system transforms into:
+</p>
+
+<pre data-lang="e0">
+x1 + b = x2
+x3 * b = x4
+</pre>
+
+<p class="chunk-paragraph">
+  Bit shift operators are free because they simply establish links between corresponding bits. For
+  example, <code>a &lt;&lt; 2 = r</code> sets up the links <code>r:2 == a:0</code>,
+  <code>r:3 == a:1</code>, and so on. No new variables or equations are created—only references
+  between existing bits are established.
+</p>

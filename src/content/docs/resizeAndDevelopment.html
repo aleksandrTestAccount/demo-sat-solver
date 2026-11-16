@@ -1,0 +1,55 @@
+<h3>Resize</h3>
+
+<p class="chunk-paragraph">
+  <strong>Note:</strong> The <code>resize</code> construct is unstable and may be changed or
+  removed in future versions.
+</p>
+
+<p class="chunk-paragraph">
+  <code>resize</code> supports all power-of-two modular operations as well as the following
+  non-modular operations: <code>+</code>, <code>-</code>, <code>*</code>, <code>**</code>,
+  <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>, and <code>&lt;=</code>. It temporarily
+  adjusts the active bit width for integer and fractional parts across all supported operations on
+  that line, fixing any excess higher-order bits to <code>false</code>:
+</p>
+
+<pre data-lang="e0">
+size 10 0;
+
+resize 8 0: a + b = r  /* addition with 8 bits
+
+a:10 == false
+b:10 == false
+r:10 == false
+
+a:9 == false
+b:9 == false
+r:9 == false
+*/
+</pre>
+
+<p class="chunk-paragraph">
+  <code>resize</code> also works seamlessly with power-of-two modular operations:
+</p>
+
+<pre data-lang="e0">
+size 15 3;
+
+// 8 bits for modular operations (mod 256):
+resize 8 0: a {+} b {*} c = r {:&lt;&lt;:} 2
+</pre>
+
+<h3>Development</h3>
+
+<p class="chunk-paragraph">
+  This solver is currently in the prototype stage and serves as a proof of concept. The primary
+  goal was to build the tool quickly so that it runs directly in the browser and can be used
+  locally without requiring a backend server.
+</p>
+
+<p class="chunk-paragraph">
+  Initially, the language was designed around a minimal set of operators while avoiding
+  function-like constructs. That constraint led to several specialized operators and syntax
+  constructs such as <code>{:&lt;&lt;:}</code>, <code>|:</code>, <code>+:</code>, and
+  <code>&lt;:&gt;</code>, which may be redesigned in future iterations.
+</p>

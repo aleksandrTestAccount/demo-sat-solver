@@ -1,0 +1,142 @@
+<p class="chunk-paragraph">
+  The table below shows the exact number of <code>3CNF-SAT</code> clauses and the corresponding
+  clause encodings generated for fundamental boolean and adder operations.
+</p>
+
+<table>
+  <thead>
+    <tr>
+      <th>Operation / Function<br>(Clauses Count)</th>
+      <th>Expression</th>      
+      <th>Generated Clauses</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td>Half Adder<br>(6)</td>
+      <td><code>r += a b</code></td>      
+      <td><pre>a b !r:0
+a b !r:1
+!a !b r:1
+a !b r:0
+!a b r:0
+!r:1 !r:0</pre></td>
+    </tr>
+    <tr>
+      <td>Full Adder<br>(10)</td>
+      <td><code>r += a b c</code></td>      
+      <td><pre>a b !t
+a !b t
+t c !r:0
+t !c r:0
+!a !b !t
+!a t r:1
+b t !r:1
+!t c !r:1
+!t !c !r:0
+!t r:1 r:0</pre></td>
+    </tr>
+    <tr>
+      <td>Full Adder (one value is <code>true</code>)<br>(6)</td></td>
+      <td><code>r += a true b</code></td>      
+      <td><pre>!a b !r:0
+!a !b r:0
+!a r:1
+a b !r:1
+a !b !r:0
+a r:1 r:0</pre></td>
+    </tr>
+    <tr>
+      <td>Logic AND with <code>false</code> result<br>(1)</td>
+      <td><code>a &amp;&amp; b == false</code></td>      
+      <td><pre>!a !b</pre></td>
+    </tr>
+    <tr>
+      <td>Logic equation AND<br>(3)</td>
+      <td><code>a &amp;&amp; b == r</code></td>      
+      <td><pre>!a !b r
+a !r
+b !r</pre></td>
+    </tr>
+    <tr>
+      <td>Logic OR with <code>true</code> result<br>(1)</td>
+      <td><code>a || b</code></td>      
+      <td><pre>a b</pre></td>
+    </tr>
+    <tr>
+      <td>Logic OR (3 vars, result is <code>true</code>)<br>(1)</td>
+      <td><code>a || b || c</code></td>      
+      <td><pre>a b c</pre></td>
+    </tr>
+    <tr>
+      <td>Logic OR (4 vars, result is <code>true</code>)<br>(2)</td>
+      <td><code>a || b || c || d</code></td>      
+      <td><pre>a b t
+!t c d</pre></td>
+    </tr>
+    <tr>
+      <td>Logic OR (5 vars, result is <code>true</code>)<br>(3)</td>
+      <td><code>a || b || c || d || e</code></td>      
+      <td><pre>a b t1
+!t1 c t2
+!t2 d e</pre></td>
+    </tr>
+    <tr>
+      <td>Logic equation OR<br>(3)</td>
+      <td><code>a || b == r</code></td>      
+      <td><pre>a b !r
+!a r
+!b r</pre></td>
+    </tr>
+    <tr>
+      <td>Logic equation with 1-3 result (1 <code>false</code>, 3 <code>true</code>; or 3 <code>false</code>, 1 <code>true</code>), e.g., IMPLY<br>(3)</td>
+      <td><code>!a || b == r</code></td>      
+      <td><pre>!a b !r
+a r
+!b r</pre></td>
+    </tr>
+    <tr>
+      <td>Logic equation with 2-2 result (XOR, XNOR)<br>(4)</td>
+      <td><code>a == b == r</code></td>      
+      <td><pre>a b r
+a !b !r
+!a b !r
+!a !b r</pre></td>
+    </tr>
+    <tr>
+      <td>If <code>(a == true)</code> then <code>b == r</code><br>(2)</td>
+      <td><code>a ? b == r</code></td>      
+      <td><pre>!a b !r
+!a !b r</pre></td>
+    </tr>
+    <tr>
+      <td>If <code>(a == b)</code> then <code>r == true</code><br>(2)</td>
+      <td><code>a || b || r</code><br><code>!a || !b || r</code></td>      
+      <td><pre>a b r
+!a !b r</pre></td>
+    </tr>
+    <tr>
+      <td>If <code>(a == b)</code> then <code>r == b</code><br>(2)</td>
+      <td><code>a || b || !r</code><br><code>!a || !b || r</code></td>      
+      <td><pre>a b !r
+!a !b r</pre></td>
+    </tr>
+    <tr>
+      <td>If <code>(a || b)</code> then <code>r == true</code><br>(2)</td>
+      <td><code>!a || r</code><br><code>!b || r</code></td>      
+      <td><pre>!a r
+!b r</pre></td>
+    </tr>
+    <tr>
+      <td>If <code>(a || b)</code> then <code>r == b</code><br>(2)</td>
+      <td><code>!a || b || !r</code><br><code>!b || r</code></td>      
+      <td><pre>!a b !r
+!b r</pre></td>
+    </tr>
+    <tr>
+      <td>If <code>(a &amp;&amp; b)</code> then <code>r == true</code><br>(1)</td>
+      <td><code>!a || !b || r</code></td>      
+      <td><pre>!a !b r</pre></td>
+    </tr>
+  </tbody>
+</table>
