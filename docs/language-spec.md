@@ -6,6 +6,8 @@ Proto Equation Language is a declarative constraint language and built-in solver
 
 [more examples here - examples.md](./examples.md)
 
+[benchmarks.md](./benchmarks.md)
+
 ## Table of Contents
 
 - [Getting Started & Simple Examples](#getting-started--simple-examples)

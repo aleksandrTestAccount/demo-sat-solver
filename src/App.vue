@@ -115,7 +115,7 @@ function handleCopyCode(newCode) {
       <div ref="editorPaneRef" class="pane-editor">
         <CodeEditor
           v-model:code="sourceCode"
-          file-name="playground.eproto"
+          file-name=""
           @solving="handleSolvingStart"
           @solved="handleSolverResult"
         />

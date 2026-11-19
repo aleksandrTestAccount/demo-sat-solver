@@ -1,5 +1,6 @@
 import { ref, onBeforeUnmount } from 'vue'
 import { SolverWrapper } from '../domain/SolverWrapper.js'
+import { SOLVER_TYPES } from '../domain/solverTypes.js'
 
 const PROGRESS_DELAY_MS = 180
 
@@ -35,7 +36,7 @@ export function useSolver({ onStart, onFinish } = {}) {
     progressMsg.value = ''
   }
 
-  const solve = (code) => {
+  const executeWorker = (code, extraPayload = {}) => {
     onStart?.()
     clearTimerAndStatus()
 
@@ -47,6 +48,7 @@ export function useSolver({ onStart, onFinish } = {}) {
     }, PROGRESS_DELAY_MS)
 
     solverWrapper.solve(code, {
+      extraPayload,
       onProgress: (msg) => {
         progressMsg.value = msg
       },
@@ -68,6 +70,21 @@ export function useSolver({ onStart, onFinish } = {}) {
     })
   }
 
+  const solve = (code, { solverType = SOLVER_TYPES.MINISAT } = {}) =>
+    executeWorker(code, { solverType })
+
+  const applyExternalAssignment = (code, assignment) =>
+    executeWorker(code, { externalAssignment: assignment })
+
+  const compileToDimacs = (code) =>
+    new Promise((resolve, reject) => {
+      solverWrapper.solve(code, {
+        extraPayload: { extractDimacs: true },
+        onSuccess: (dimacsPayload) => resolve(dimacsPayload),
+        onFailure: (err) => reject(err)
+      })
+    })
+
   const stop = () => {
     clearTimerAndStatus()
     solverWrapper.terminate()
@@ -86,6 +103,8 @@ export function useSolver({ onStart, onFinish } = {}) {
     isCalculating,
     progressMsg,
     solve,
-    stop
+    stop,
+    compileToDimacs,
+    applyExternalAssignment
   }
 }

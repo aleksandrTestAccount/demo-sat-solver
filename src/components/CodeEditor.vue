@@ -2,6 +2,8 @@
 import { ref, watch, computed, nextTick } from 'vue'
 import { useCodeHighlighter } from '../composables/useCodeHighlighter.js'
 import { useSolver } from '../composables/useSolver.js'
+import DimacsModal from './DimacsModal.vue'
+import { SOLVER_TYPES } from '../domain/solverTypes.js'
 
 const props = defineProps({
   code: { type: String, required: true },
@@ -22,12 +24,40 @@ const textareaRef = ref(null)
 const totalLines = computed(() => sourceCode.value.split('\n').length || 1)
 const { highlightedCode } = useCodeHighlighter(sourceCode)
 
-const { isCalculating, progressMsg, solve, stop } = useSolver({
+const { isCalculating, progressMsg, solve, stop, compileToDimacs, applyExternalAssignment } = useSolver({
   onStart: () => emit('solving'),
   onFinish: (payload) => emit('solved', payload)
 })
 
-const handleSolve = () => solve(sourceCode.value)
+const isDimacsOpen = ref(false)
+const isExportingDimacs = ref(false)
+const dimacsData = ref({ dimacs: '', varMap: {}, varsCount: 0, clausesCount: 0 })
+const dimacsCompileError = ref('')
+
+const handleOpenDimacs = async () => {
+  dimacsCompileError.value = ''
+  isExportingDimacs.value = true
+  try {
+    dimacsData.value = await compileToDimacs(sourceCode.value)
+  } catch (err) {
+    dimacsCompileError.value = err?.msg || err?.message || 'Compilation error'
+  } finally {
+    isExportingDimacs.value = false
+    isDimacsOpen.value = true
+  }
+}
+
+const handleApplyDimacs = (assignment) => {
+  isDimacsOpen.value = false
+  applyExternalAssignment(sourceCode.value, assignment)
+}
+
+const selectedSolver = ref(SOLVER_TYPES.MINISAT)
+
+const handleSolve = () => {
+  solve(sourceCode.value, { solverType: selectedSolver.value })
+}
+
 const handleStop = () => stop()
 
 const syncScroll = () => {
@@ -58,6 +88,8 @@ watch(sourceCode, () => {
 watch(highlightedCode, () => {
   nextTick(syncScroll)
 })
+
+
 </script>
 
 <template>
@@ -66,6 +98,38 @@ watch(highlightedCode, () => {
       <span class="file-name">{{ fileName }}</span>
 
       <div class="toolbar-actions">
+        <button
+          type="button"
+          class="dimacs-btn"
+          :disabled="isCalculating || isExportingDimacs"
+          @click="handleOpenDimacs"
+        >
+          {{ isExportingDimacs ? 'Compiling...' : 'To DIMACS' }}
+        </button>
+
+        <div class="solver-switch" role="group" aria-label="Select SAT solver">
+          <button
+            type="button"
+            :class="['switch-option', { 'is-active': selectedSolver === SOLVER_TYPES.MINISAT }]"
+            :aria-pressed="selectedSolver === SOLVER_TYPES.MINISAT"
+            :disabled="isCalculating"
+            title="Fast C++ MiniSat compiled to WebAssembly"
+            @click="selectedSolver = SOLVER_TYPES.MINISAT"
+          >
+            MiniSat (WASM)
+          </button>
+          <button
+            type="button"
+            :class="['switch-option', { 'is-active': selectedSolver === SOLVER_TYPES.BUILTIN }]"
+            :aria-pressed="selectedSolver === SOLVER_TYPES.BUILTIN"
+            :disabled="isCalculating"
+            title="Custom pure JavaScript 3-SAT solver"
+            @click="selectedSolver = SOLVER_TYPES.BUILTIN"
+          >
+            Built-in JS
+          </button>
+        </div>
+
         <button type="button" v-if="isCalculating" class="stop-btn" @click="handleStop">
           Stop
         </button>
@@ -102,6 +166,16 @@ watch(highlightedCode, () => {
       </div>
     </div>
   </div>
+
+  <DimacsModal
+      :visible="isDimacsOpen"
+      :dimacs="dimacsData.dimacs"
+      :var-map="dimacsData.varMap"
+      :stats="{ varsCount: dimacsData.varsCount, clausesCount: dimacsData.clausesCount }"
+      :compile-error="dimacsCompileError"
+      @close="isDimacsOpen = false"
+      @apply="handleApplyDimacs"
+    />
 </template>
 
 <style scoped>
@@ -297,4 +371,68 @@ watch(highlightedCode, () => {
   white-space: pre-wrap;
   word-break: break-all;
 }
+
+.dimacs-btn {
+  padding: 6px 14px;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--text-main);
+  background-color: var(--bg-editor);
+  border: 1px solid var(--border-color);
+  border-radius: 0;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.dimacs-btn:hover:not(:disabled) {
+  border-color: var(--border-strong);
+  background-color: var(--bg-tertiary);
+}
+
+.dimacs-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.solver-switch {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px;
+  gap: 2px;
+  border: 1px solid var(--border-color);
+  background-color: #f1f5f9;
+}
+
+.switch-option {
+  display: inline-flex;
+  align-items: center;
+  padding: 4px 10px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.switch-option:hover:not(:disabled):not(.is-active) {
+  color: var(--text-main);
+  background-color: rgba(255, 255, 255, 0.6);
+}
+
+.switch-option.is-active {
+  background-color: #ffffff;
+  color: #1d4ed8;
+  border-color: #cbd5e1;
+  box-shadow: inset 0 -1px 0 #2563eb;
+}
+
+.switch-option:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 </style>

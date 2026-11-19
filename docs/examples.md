@@ -201,8 +201,6 @@ size 10 0
 ```text
 //Quadratic programming
 
-/* Fast solver is not yet implemented
-
 size 10 4
 
 binarySearch min r -800 0
@@ -212,7 +210,7 @@ r = 3*x1*x1 + 5*x2*x2 - 7*x1*x2 - 35*x1 - 50*x2
 x1 + x2 <= 9
 x1 + x2 >= 3
 3*x2 - x1 >= 13
-*/
+
 ```                  
 
 

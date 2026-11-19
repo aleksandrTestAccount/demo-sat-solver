@@ -1,114 +1,72 @@
-# Proto Equation Language & Solver v0.1 — 3-SAT Playground
+# Proto Equation Language & 3-SAT Solver
 
-> **О проекте:** Этот репозиторий создан как демонстрационный пет-проект для технических собеседований. На протяжении карьеры я работал над закрытыми коммерческими продуктами, поэтому собрал этот проект как открытый пример архитектуры на современном стеке фронтенда.
+**Live Playground:** [aleksandrtestaccount.github.io/demo-sat-solver](https://aleksandrtestaccount.github.io/demo-sat-solver)
 
-**Онлайн-демо:** [aleksandrtestaccount.github.io/demo-sat-solver](https://aleksandrtestaccount.github.io/demo-sat-solver/)
+A declarative constraint language and compiler that translates arithmetic, bitwise, and logical equations into **3-CNF-SAT** boolean formulas (at most 3 literals per clause) via bit-blasting. Equations can be solved directly in the browser or from the command line using the bundled **MiniSat (WebAssembly)** solver, a built-in pure JavaScript solver, or external **DIMACS CNF** solvers (`z3`, `cadical`, `cryptominisat`).
 
-Интерактивная среда разработки и документация для декларативного языка уравнений **Proto Equation Language (`.eproto`)**. Система транслирует арифметические, побитовые и логические ограничения (Bit-Blasting) в булевы формулы формата **3-CNF-SAT** и решает их напрямую в браузере в отдельном потоке.
+> **Note:** This project was created for educational purposes as a playground for exploring SAT/SMT solving and NP-complete problems.
 
-**Стек:** Vue 3 (Composition API), Vite, Web Workers, Vanilla CSS.
+## How It Works
 
----
+1. **Bit-Blasting:** Rational numbers are represented as fixed-width two's complement boolean vectors configured globally via `size <int> <frac>` (or `size + <int> <frac>` for non-negative numbers).
+2. **3-CNF Compilation:** Expressions are decomposed into elementary operations, simplified through variable linking and CNF reductions (unit propagation, pair reduction, pure literal elimination), and compiled into ≤3-literal clauses.
+3. **Solving:** The resulting 3-CNF formula is solved using **MiniSat (WASM)** by default, the built-in backtracking JS solver, or exported via **DIMACS CNF** to external SAT/SMT solvers.
 
-## Ключевые архитектурные решения на фронтенде
+## Quick Example
 
-- **Изоляция вычислений в Web Worker:** Компиляция в 3-CNF и поиск решения (backtracking с unit propagation) вынесены в фоновый поток (`solver.worker.js`), управляемый через инкапсулированный класс `SolverWrapper` с поддержкой принудительной остановки (`Stop`) и защиты от гонки состояний.
-- **Собственный лексер без тяжёлых зависимостей:** Вместо сторонних библиотек подсветки синтаксиса реализован линейный токенизатор `O(N)` (`highlight.js`) на базе TextMate-грамматики (`e0.tmLanguage.json`) с HTML-экранированием и кадровой синхронизацией через `requestAnimationFrame`.
-- **Кастомный двухслойный редактор кода:** Построен на синхронизации прозрачного `<textarea>` и нижнего слоя подсветки `<pre><code>` с построчной нумерацией, сохранением нативной истории `Ctrl+Z` и защитой от сдвигов скролла.
+```eproto
+// Integer factorization compiled to 3-CNF-SAT
+a * b = 247
+a > 1
+b > 1
 
----
-
-## Структура проекта
-
-```text
-├── public/
-│   └── libs/
-│       └── satBundle.min.js       # Ядро компилятора и 3-SAT солвера (подгружается в рантайме воркером)
-├── src/
-│   ├── assets/
-│   │   └── main.css                # Дизайн-токены (:root), типографика и стили подсветки синтаксиса
-│   ├── components/
-│   │   ├── BaseChunk.vue           # Рендеринг HTML-статей и интерактивных блоков примеров кода
-│   │   ├── ChapterPager.vue        # Навигация между соседними разделами (Previous / Next)
-│   │   ├── CodeEditor.vue          # Двухслойный редактор кода с синхронизацией прокрутки
-│   │   ├── DocsTopNav.vue          # Верхняя панель переключения разделов документации
-│   │   ├── Sidebar.vue             # Сворачиваемое боковое меню глав (с адаптацией под мобильные)
-│   │   └── SolverResults.vue       # Вывод метрик 3-SAT, подстановки уравнений и аккордеона Details
-│   ├── composables/
-│   │   ├── useCodeHighlighter.js   # Реактивная подсветка кода через requestAnimationFrame
-│   │   ├── useSolver.js            # Управление жизненным циклом солвера, таймерами и статусами
-│   │   └── useSplitPane.js         # Логика перетаскивания разделителя между панелями
-│   ├── config/
-│   │   ├── appConfig.js            # Реестр вкладок, разделов, стартового кода и внешних ссылок
-│   │   └── e0.tmLanguage.json      # Описание грамматики языка в формате TextMate
-│   ├── content/                    # HTML-материалы справочника, примеров и генераторов
-│   │   ├── docs/
-│   │   ├── examples/
-│   ├── domain/
-│   │   ├── SolverWrapper.js        # Инкапсулированный менеджер Web Worker с приватными полями
-│   │   ├── solver.worker.js        # Фоновый поток вычислений
-│   │   └── workerEvents.js         # Словарь констант событий воркера
-│   ├── utils/
-│   │   └── highlight.js            # Синхронный лексер и HTML-экранирование токенов
-│   ├── views/
-│   │   └── ContentView.vue         # Контейнер документации с делегированием копирования примеров
-│   ├── App.vue                     # Корневой каркас split-screen приложения
-│   └── main.js                     # Точка входа
-├── eslint.config.js
-├── index.html
-├── package.json
-└── vite.config.js
+// 8-bit integer, 0-bit fraction (+1 sign bit)
+size 8 0
 ```
 
----
+More examples (modular arithmetic, number theory, Karp's NP-complete problems, fixed-point approximations) are available in [`docs/examples.md`](docs/examples.md).
 
-## Локальный запуск и разработка
+## Web Playground
 
-### Окружение
-
-- Node.js `22.22.1`
-- npm `9.2.0`
-
-### Установка и запуск
+Run the interactive editor and documentation locally:
 
 ```bash
-# Установка зависимостей
 npm install
-
-# Запуск локального dev-сервера
 npm run dev
 ```
 
-### Сборка и проверка качества кода
+In the editor toolbar, you can switch between **MiniSat (WASM)** and **Built-in JS**, or click **To DIMACS** to export the compiled DIMACS CNF formula, run it in any local or online SAT solver, and paste the output back to decode the solution.
+
+## Node.js CLI
+
+Run `.eproto` files directly from the terminal without a browser:
 
 ```bash
-# Сборка продакшен-версии (в папку dist/)
-npm run build
+# Solve using the bundled MiniSat WASM solver (default, no extra dependencies)
+node cli/index.js examples/root.eproto
 
-# Локальный предпросмотр собранного проекта
-npm run preview
+# Or via npm script
+npm run cli examples/root.eproto
 
-# Проверка и автоисправление ошибок линтером ESLint
-npm run lint
-
-# Форматирование исходного кода через Prettier
-npm run format
+# Solve using the built-in pure JS 3-SAT solver (slow)
+node cli/index.js examples/example.eproto --solver builtin
 ```
 
----
+### Using External DIMACS Solvers
 
-## О солвере и документация
+If you have external SAT/SMT solvers installed in your `PATH`, pass `--solver <name>` (`z3`, `cadical`, or `cryptominisat`):
 
-Весь вычислительный движок — от токенизатора и компилятора уравнений до самого **3-SAT солвера** — написан мной с нуля на чистом JavaScript без сторонних библиотек. Ядро изолировано от сборки Vite и подключается в Web Worker из `public/libs/satBundle.min.js`. Это мой личный пет-проект — исходный код самого движка будет открыт в отдельном репозитории после рефакторинга.
+```bash
+# Install external solvers on Debian/Ubuntu (optional)
+sudo apt update && sudo apt install -y z3 cadical cryptominisat
 
-### Из чего состоит движок и как он работает
+# Solve via external DIMACS backends
+node cli/index.js examples/root.eproto --solver z3
+node cli/index.js examples/root.eproto --solver cadical
+node cli/index.js examples/root.eproto --solver cryptominisat
+```
 
-1. **Собственный токенизатор и парсер:** Исходный код построчно разбивается на токены, проверяется синтаксис, приоритеты операций, скобки и директивы конфигурации (например, разрядность чисел `size`).
-2. **Разбор на простые уравнения:** Сложные выражения (арифметические, побитовые и логические) раскладываются в плоский список простых четвёрок вида `[operand1, operator, operand2, result]` с созданием временных промежуточных переменных.
-3. **Оптимизация связей:** Полученные простые уравнения упрощаются и сокращаются.
-4. **Трансляция в 3-CNF-SAT:** Каждое уравнение разворачивается в конъюнктивную нормальную форму (КНФ), где каждый дизъюнкт ограничен максимум тремя литералами.
-5. **Собственный 3-SAT решатель:** Итоговая булева формула оптимизируется и решается написанным с нуля солвером на базе поиска с возвратом (backtracking) и распространения единиц (unit propagation).
+## Documentation
 
-
-- [Спецификация языка](docs/language-spec.md)
-- [Примеры систем уравнений](docs/examples.md)
+* **[Language Specification](docs/language-spec.md)** — data types, operators, bit access, optimization rules, and configuration directives.
+* **[Examples](docs/examples.md)** — collection of constraint problems and algorithms.

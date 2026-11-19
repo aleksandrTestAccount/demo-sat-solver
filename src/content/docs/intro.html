@@ -2,7 +2,7 @@
   <h1 class="proto-hero-title">Proto Equation Language</h1>
 
   <p class="proto-hero-lead">
-    A declarative constraint language and built-in solver that compiles arithmetic, bitwise, and logical equations into <strong style="white-space: nowrap;">3-CNF-SAT</strong> boolean formulas (at most 3 literals per clause) and solves them directly in the browser.
+    A declarative constraint language that compiles arithmetic, bitwise, and logical equations into <strong style="white-space: nowrap;">3-CNF-SAT</strong> boolean formulas (at most 3 literals per clause) and solves them directly in the browser using <strong>MiniSat (WebAssembly)</strong> or a built-in JS solver.
   </p>
 
   <div class="proto-pipeline">
@@ -16,10 +16,10 @@
       <span class="pipe-name">3-CNF Compilation</span>
       <span class="pipe-desc">Reduction to ≤3-literal clauses</span>
     </div>
-    <div class="pipe-step">
+     <div class="pipe-step">
       <span class="pipe-num">03</span>
       <span class="pipe-name">3-SAT Solver</span>
-      <span class="pipe-desc">Basic backtracking search with unit propagation</span>
+      <span class="pipe-desc">MiniSat (WASM) or built-in JS backtracking solver</span>
     </div>
   </div>
 </div>
@@ -55,6 +55,51 @@ size 8 0</pre>
 <p class="chunk-paragraph">
   <strong>Compilation Trade-off:</strong> This tool attempts to build a 3-CNF formula with the smallest possible number of clauses. While this is not always achieved, keep in mind that a minimal clause count is not always good—it can be inconvenient for SAT solvers and slow down the search.
 </p>
+
+<p class="chunk-paragraph">
+  <strong>DIMACS Export &amp; Import:</strong> Need more solving power right from the browser? Click <strong>To DIMACS</strong> next to the <strong>Solve</strong> button to export your compiled 3-CNF formula, run it in any external local or online SAT solver, and paste the raw output back to decode the final variable values and equations.
+</p>
+
+<div class="cli-section">
+  <div class="cli-section-header">
+    <h2 class="cli-section-title">Node.js CLI &amp; External DIMACS Solvers</h2>
+    <span class="cli-badge">Local Execution</span>
+  </div>
+
+  <p class="chunk-paragraph">
+    For local automation, scripting, and heavier benchmarks, clone the repository and use the zero-dependency Node.js CLI runner (<code>cli/index.js</code>). By default, it executes equations using the bundled <strong>MiniSat (WebAssembly)</strong> solver without requiring any external binaries.
+  </p>
+
+  <p class="chunk-paragraph">
+    You can also pass the <code>--solver</code> flag to switch to the built-in JS solver or stream the compiled 3-CNF formula via standard <strong>DIMACS CNF</strong> into external industrial SAT/SMT solvers installed in your system <code>PATH</code>:
+  </p>
+
+  <ul class="cli-solvers-list">
+    <li><code>minisat</code> — Bundled C++ MiniSat compiled to WebAssembly (default, works out of the box).</li>
+    <li><code>builtin</code> — Built-in slow and simple JavaScript 3-SAT solver.</li>
+    <li><code>z3</code> — Microsoft Z3 SMT/SAT solver.</li>
+    <li><code>cadical</code> — CaDiCaL CDCL SAT solver.</li>
+    <li><code>cryptominisat</code> — CryptoMiniSat solver.</li>
+  </ul>
+
+  <pre data-lang="bash"># 1. Clone the repository and enter the directory
+git clone https://github.com/aleksandrtestaccount/demo-sat-solver
+cd demo-sat-solver
+
+# 2. Run with the bundled MiniSat WASM solver (default, no extra dependencies)
+node cli/index.js examples/root.eproto
+
+# 3. Or run with the built-in slow and simple JS solver
+node cli/index.js examples/example.eproto --solver builtin
+
+# 4. Optional: install external DIMACS solvers on Linux (Debian/Ubuntu)
+sudo apt update &amp;&amp; sudo apt install -y z3 cadical cryptominisat
+
+# 5. Offload solving to external industrial DIMACS solvers
+node cli/index.js examples/root.eproto --solver z3
+node cli/index.js examples/root.eproto --solver cadical
+node cli/index.js examples/root.eproto --solver cryptominisat</pre>
+</div>
 
 <style>
   .proto-hero {
@@ -149,7 +194,7 @@ size 8 0</pre>
     line-height: 1.45;
   }
 
-   .intro-notes-list {
+  .intro-notes-list {
     display: flex;
     flex-direction: column;
     gap: 14px;
@@ -184,10 +229,106 @@ size 8 0</pre>
     color: var(--text-secondary);
   }
 
+  .cli-section {
+    margin-top: 32px;
+    padding-top: 28px;
+    border-top: 1px solid var(--border-color);
+  }
+
+  .cli-section-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+    margin-bottom: 14px;
+  }
+
+  .cli-section-title {
+    font-size: 1.35rem;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--text-main);
+    margin: 0;
+  }
+
+  .cli-badge {
+    font-family: var(--font-mono);
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 4px 10px;
+    background-color: #f5f3ff;
+    color: #6d28d9;
+    border: 1px solid #ddd6fe;
+  }
+
+  .cli-solvers-list {
+    margin: 14px 0 18px;
+    padding-left: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    font-size: 0.94rem;
+    line-height: 1.6;
+    color: var(--text-secondary);
+  }
+
+  .cli-solvers-list li strong {
+    color: var(--text-main);
+  }
+
+  .cli-repo-note {
+    margin-top: 14px;
+    font-size: 0.92rem;
+  }
+
+  .cli-repo-note a {
+    color: #2563eb;
+    font-weight: 600;
+    text-decoration: none;
+  }
+
+  .cli-repo-note a:hover {
+    text-decoration: underline;
+  }
+
   @media (max-width: 720px) {
     .proto-pipeline,
     .intro-notes-grid {
       grid-template-columns: 1fr;
     }
+  }
+
+   pre[data-lang="bash"] {
+    position: relative;
+    background-color: #f8fafc;
+    color: #1e293b;
+    border: 1px solid #e2e8f0;
+    border-left: 3px solid #6d28d9;
+    border-radius: 6px;
+    padding: 18px 20px 16px;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+    line-height: 1.65;
+    overflow-x: auto;
+    margin: 16px 0 8px;
+  }
+
+  pre[data-lang="bash"]::before {
+    content: "BASH";
+    position: absolute;
+    top: 8px;
+    right: 12px;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: #64748b;
+    background-color: #e2e8f0;
+    padding: 2px 7px;
+    border-radius: 4px;
+    pointer-events: none;
   }
 </style>

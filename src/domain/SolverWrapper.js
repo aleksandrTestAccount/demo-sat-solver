@@ -1,21 +1,10 @@
 import SolverWorker from './solver.worker.js?worker'
 import { WORKER_EVENTS } from './workerEvents.js'
 
-/**
- * @typedef {Object} SolverCallbacks
- * @property {(msg: string) => void} [onProgress] - Invoked on each progress step
- * @property {(result: any) => void} [onSuccess] - Invoked when calculations complete successfully
- * @property {(error: any) => void} [onFailure] - Invoked on solver error or worker crash
- */
 export class SolverWrapper {
   #worker = null
 
-  /**
-   * Runs calculations in a background thread
-   * @param {string} code - Source code in E0 language
-   * @param {SolverCallbacks} [callbacks] - Event handler callbacks
-   */
-  solve(code, { onProgress, onSuccess, onFailure } = {}) {
+  solve(code, { onProgress, onSuccess, onFailure, extraPayload = {} } = {}) {
     this.terminate()
 
     try {
@@ -45,7 +34,8 @@ export class SolverWrapper {
 
       this.#worker.postMessage({
         code,
-        baseUrl: window.location.href
+        baseUrl: window.location.href,
+        ...extraPayload
       })
     } catch (err) {
       this.terminate()
@@ -53,9 +43,6 @@ export class SolverWrapper {
     }
   }
 
-  /**
-   * Terminates the running worker thread
-   */
   terminate() {
     if (this.#worker) {
       try {
